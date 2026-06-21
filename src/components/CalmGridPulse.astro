@@ -8,7 +8,10 @@
 <div class="cg-bg" aria-hidden="true"><canvas data-cg-canvas></canvas></div>
 
 <style>
-  .cg-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  /* Anchor to the STABLE large-viewport height (lvh), NOT bottom:0/dynamic viewport — so the
+     mobile address-bar show/hide on scroll does not resize this layer (which previously
+     rescaled the static bitmap and looked like a "reshuffle"). vh is a fallback for old browsers. */
+  .cg-bg { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: -1; pointer-events: none; overflow: hidden; }
   .cg-bg canvas { display: block; width: 100%; height: 100%; }
 </style>
 
@@ -30,7 +33,10 @@
 
     function size() {
       const dpr = Math.min(2, window.devicePixelRatio || 1);
-      W = window.innerWidth; H = window.innerHeight;
+      // Use the canvas's actual rendered size (driven by the stable lvh layer), NOT
+      // window.innerHeight — so the dynamic mobile address bar never forces a bitmap rescale.
+      W = canvas.clientWidth || window.innerWidth;
+      H = canvas.clientHeight || window.innerHeight;
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
