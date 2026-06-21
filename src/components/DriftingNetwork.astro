@@ -126,8 +126,21 @@
         window.addEventListener('blur', () => { mouse.active = false; });
         window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
       }
+      // Re-init ONLY on a real width change (orientation / desktop resize). Mobile scroll
+      // fires resize as the address bar shows/hides — that changes height, not width — so we
+      // ignore height-only resizes and keep the existing nodes running (no reshuffle).
       let rt = 0;
-      window.addEventListener('resize', () => { clearTimeout(rt); rt = window.setTimeout(() => { size(); build(); }, 200); });
+      let lastW = window.innerWidth;
+      window.addEventListener('resize', () => {
+        clearTimeout(rt);
+        rt = window.setTimeout(() => {
+          const w = window.innerWidth;
+          if (Math.abs(w - lastW) < 5) return; // address-bar height change only — keep stable
+          lastW = w;
+          size();
+          build();
+        }, 220);
+      });
       document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
       const io = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? start() : stop())); });
       io.observe(wrap);
