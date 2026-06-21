@@ -24,7 +24,6 @@
     const AMBER = '242, 169, 59';
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mqMobile = window.matchMedia('(max-width: 767px)');
-    const interactive = () => window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
 
     let W = 0, H = 0, raf = 0, running = false;
     let nodes: { x: number; y: number; vx: number; vy: number }[] = [];
@@ -59,7 +58,6 @@
     function frame() {
       ctx.clearRect(0, 0, W, H);
       const link = linkDist();
-      const react = interactive() && !mqMobile.matches;
       const now = performance.now();
       ripples = ripples.filter((r) => now - r.t < 600);
 
@@ -67,7 +65,7 @@
         n.x += n.vx; n.y += n.vy;
         if (n.x < 0 || n.x > W) n.vx *= -1;
         if (n.y < 0 || n.y > H) n.vy *= -1;
-        if (react && mouse.active) {
+        if (mouse.active) {
           const dx = mouse.x - n.x, dy = mouse.y - n.y, d = Math.hypot(dx, dy);
           if (d < 170 && d > 0.1) { const f = ((170 - d) / 170) * 0.14; n.x += (dx / d) * f; n.y += (dy / d) * f; }
         }
@@ -91,8 +89,8 @@
         }
       }
 
-      // cursor glow + brightened links
-      if (react && mouse.active) {
+      // pointer (mouse or touch) glow + brightened links
+      if (mouse.active) {
         const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 150);
         g.addColorStop(0, `rgba(${AMBER}, 0.05)`); g.addColorStop(1, `rgba(${AMBER}, 0)`);
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 150, 0, Math.PI * 2); ctx.fill();
@@ -123,18 +121,12 @@
     function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
     function stop() { running = false; cancelAnimationFrame(raf); }
 
-    // Decide ONCE on load: animate only on a real desktop (≥768px + fine pointer) without
-    // reduced-motion. Everything else (mobile width, touch / coarse pointer, reduced-motion)
-    // renders a single STATIC frame — no loop, no listeners, no scroll-driven regeneration.
-    const animated = !reduce && window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
-
     size(); build();
 
-    if (!animated) {
-      // STATIC: draw one frame and stop. No rAF, no pointer/touch reactivity.
+    if (reduce) {
+      // Reduced motion: single static frame, no loop, no interactivity.
       frame();
-      // Only on a genuine width/orientation change, redraw the single static frame at the new
-      // size. Height-only resizes (mobile address bar on scroll) are ignored → never reshuffles.
+      // Still redraw once on a genuine width/orientation change (ignore height-only resizes).
       let rt = 0;
       let lastW = window.innerWidth;
       window.addEventListener('resize', () => {
@@ -143,17 +135,21 @@
           const w = window.innerWidth;
           if (Math.abs(w - lastW) < 5) return;
           lastW = w;
-          size();
-          build();
-          frame();
+          size(); build(); frame();
         }, 220);
       });
     } else {
-      // INTERACTIVE (desktop) — unchanged: drift + hover glow/attraction + click ripple.
-      window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+      // FULL animation on every size (desktop AND mobile). Pointer Events drive one code path
+      // for mouse + touch: drag/move → attraction + glow follows the pointer; press/tap → ripple.
+      // Canvas stays pointer-events:none + listeners on window, so UI taps are never stolen.
+      window.addEventListener('pointermove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+      window.addEventListener('pointerdown', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      // Touch lifts → let the glow fade (mouse keeps tracking via pointermove).
+      window.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') mouse.active = false; }, { passive: true });
+      window.addEventListener('pointercancel', () => { mouse.active = false; }, { passive: true });
       window.addEventListener('blur', () => { mouse.active = false; });
-      window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
-      // Re-init only on a real width change; ignore height-only resizes.
+      // Re-init only on a real WIDTH change (orientation / desktop resize); ignore height-only
+      // resizes from the mobile address bar so the lvh layer stays stable (no scroll reshuffle).
       let rt = 0;
       let lastW = window.innerWidth;
       window.addEventListener('resize', () => {

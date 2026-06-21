@@ -24,7 +24,6 @@
     const AMBER = '242, 169, 59';
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const mqMobile = window.matchMedia('(max-width: 767px)');
-    const interactive = () => window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
 
     let W = 0, H = 0, raf = 0, running = false;
     const mouse = { x: -9999, y: -9999, active: false };
@@ -45,7 +44,6 @@
     function frame() {
       ctx.clearRect(0, 0, W, H);
       const G = gap();
-      const react = interactive() && !mqMobile.matches;
       const now = performance.now();
       ripples = ripples.filter((r) => now - r.t < 900);
 
@@ -73,8 +71,8 @@
         ctx.fillStyle = g; ctx.fillRect(sweepX - 120, 0, 240, H);
       }
 
-      // spotlight on intersections near cursor
-      if (react && mouse.active) {
+      // spotlight on intersections near the pointer (mouse or touch)
+      if (mouse.active) {
         const R = 120;
         const x0 = Math.max(0, Math.floor((mouse.x - R) / G) * G);
         const x1 = Math.min(W, mouse.x + R);
@@ -110,18 +108,12 @@
     function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
     function stop() { running = false; cancelAnimationFrame(raf); }
 
-    // Decide ONCE on load: animate only on a real desktop (≥768px + fine pointer) without
-    // reduced-motion. Mobile width, touch / coarse pointer, and reduced-motion get a single
-    // STATIC frame — no loop, no listeners, no scroll-driven regeneration.
-    const animated = !reduce && window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
-
     size();
 
-    if (!animated) {
-      // STATIC: draw one frame and stop. No rAF, no pointer/touch reactivity, no sweep motion.
+    if (reduce) {
+      // Reduced motion: single static frame, no loop, no interactivity, no sweep motion.
       frame();
-      // Redraw the single static frame only on a genuine width/orientation change; ignore
-      // height-only resizes (mobile address bar) so it never reshuffles on scroll.
+      // Redraw once on a genuine width/orientation change; ignore height-only resizes.
       let rt = 0;
       let lastW = window.innerWidth;
       window.addEventListener('resize', () => {
@@ -130,15 +122,20 @@
           const w = window.innerWidth;
           if (Math.abs(w - lastW) < 5) return;
           lastW = w;
-          size();
-          frame();
+          size(); frame();
         }, 220);
       });
     } else {
-      // INTERACTIVE (desktop) — unchanged: light-sweep + hover spotlight + click ripple.
-      window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+      // FULL animation on every size (desktop AND mobile). Pointer Events drive one path for
+      // mouse + touch: move/drag → spotlight follows the pointer; press/tap → ripple. Canvas is
+      // pointer-events:none with window listeners, so UI taps are never stolen.
+      window.addEventListener('pointermove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+      window.addEventListener('pointerdown', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      window.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') mouse.active = false; }, { passive: true });
+      window.addEventListener('pointercancel', () => { mouse.active = false; }, { passive: true });
       window.addEventListener('blur', () => { mouse.active = false; });
-      window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      // Re-init only on a real WIDTH change; ignore height-only resizes (mobile address bar) so
+      // the lvh layer stays stable and the background never reshuffles on scroll.
       let rt = 0;
       let lastW = window.innerWidth;
       window.addEventListener('resize', () => {
