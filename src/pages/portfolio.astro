@@ -1,0 +1,475 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import DriftingNetwork from '../components/DriftingNetwork.astro';
+
+// Each venture carries an accent gradient (from → to) used by the desktop floating
+// preview tile and the mobile card header. data-venture slugs mark where real logos
+// can be dropped in later.
+const ventures = [
+  {
+    num: '01', name: 'Tall Nest Group', slug: 'tallnest', logo: null,
+    sector: 'FMCG & Confectionery', location: 'Pakistan (Nationwide)',
+    from: '#d8557a', to: '#7a2440',
+    desc: "A fast-moving consumer goods operation in the confectionery sector, manufacturing and distributing branded confectionery products across Pakistan's national retail market.",
+    services: ['FMCG Manufacturing', 'Nationwide Distribution Network'],
+  },
+  {
+    num: '02', name: 'Clothmen', slug: 'clothmen', logo: '/venture-logos/venture-5-clothmer-apparel.webp',
+    sector: 'Apparel Manufacturing & Export', location: 'South Asia ↔ Europe · US · MENA',
+    from: '#c79a3a', to: '#6e5114',
+    desc: 'Structured manufacturing oversight and export coordination of apparel and textile products to international retail markets.',
+    services: ['Multi-Region Export Operations', 'International Distribution Networks'],
+  },
+  {
+    num: '03', name: 'MAQQAM', slug: 'maqqam', logo: '/venture-logos/venture-1-maqqam-realestate.webp',
+    sector: 'Real Estate', location: 'Lahore, Pakistan',
+    from: '#F2A93B', to: '#9c6610',
+    desc: "A real estate sales and marketing company based in Lahore, driving structured property campaigns, buyer engagement, and market positioning across Pakistan's property sector.",
+    services: ['Property Sales Campaigns', 'Regional Market Positioning'],
+  },
+  {
+    num: '04', name: 'webage', slug: 'webage', logo: '/venture-logos/venture-2-webage-ai.webp',
+    sector: 'AI & Smart Systems', location: 'UAE · Pakistan · N. America',
+    from: '#7c6ff0', to: '#3b2f99',
+    desc: 'Design and deployment of automation-driven digital infrastructure for service businesses — CRM systems, AI workflows, payment processing, and smart website frameworks.',
+    services: ['Multi-Market SaaS Deployments', 'Automation-Based Recurring Systems'],
+  },
+  {
+    num: '05', name: 'Design Disorder', slug: 'design-disorder', logo: '/venture-logos/venture-3-designdisorder-brand.webp',
+    sector: 'Brand Strategy & Digital', location: 'Middle East · South Asia · N. America',
+    from: '#3b82d8', to: '#13407a',
+    desc: 'Strategic brand development and digital campaigns across real estate, healthcare, technology, and consumer sectors.',
+    services: ['Cross-Border Client Portfolio', 'Multi-Industry Campaign Execution'],
+  },
+  {
+    num: '06', name: 'Faham', slug: 'faham', logo: '/venture-logos/venture-4-zahan-engineering.webp',
+    sector: 'Engineering & Infrastructure', location: 'Pakistan',
+    from: '#5b8c6a', to: '#274d33',
+    desc: 'Engineering-led operations supporting infrastructure and industrial development projects through structured execution and technical oversight.',
+    services: ['National-Scale Engineering Operations', 'Infrastructure-Aligned Projects'],
+  },
+];
+
+const marquee =['Real Estate', 'AI & Smart Systems', 'Brand Strategy', 'Engineering', 'Apparel Export', 'FMCG & Confectionery'];
+---
+
+<Layout title="Portfolio" description="The BizVault Group — six ventures spanning real estate, AI systems, brand strategy, engineering, apparel export, and FMCG across global markets.">
+
+  <DriftingNetwork />
+
+  <!-- ============ SECTION 1 · CINEMATIC HERO ============ -->
+  <Hero
+    eyebrow="Portfolio"
+    uppercase={true}
+    tall={true}
+    subhead="From digital platforms to international textile exports — a look at how the BizVault Group operates across sectors, borders, and industries."
+  >
+    <Fragment slot="headline">
+      <span class="block">
+        <span class="inline-block overflow-hidden align-bottom"><span class="hero-word inline-block">Projects</span></span>
+        {' '}
+        <span class="inline-block overflow-hidden align-bottom"><span class="hero-word inline-block">That</span></span>
+      </span>
+      <span class="block">
+        <span class="inline-block overflow-hidden align-bottom"><span class="hero-word inline-block">Move</span></span>
+        {' '}
+        <span class="inline-block overflow-hidden align-bottom"><span class="hero-word inline-block">Markets<span class="text-bizvault-amber">.</span></span></span>
+      </span>
+    </Fragment>
+
+    <Fragment slot="below">
+      <!-- Infinite sector marquee -->
+      <div class="marquee mt-16 border-y border-bizvault-border overflow-hidden py-4">
+        <div class="marquee__track flex w-max whitespace-nowrap will-change-transform">
+          {[0, 1].map((g) => (
+            <div class="flex items-center shrink-0" aria-hidden={g === 1 ? 'true' : 'false'}>
+              {marquee.map((item) => (
+                <span class="flex items-center">
+                  <span class="font-display uppercase tracking-wide text-bizvault-muted text-base lg:text-lg px-6">{item}</span>
+                  <span class="text-bizvault-amber">•</span>
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Scroll cue -->
+      <div class="mt-10 flex items-center gap-2 text-bizvault-muted text-xs tracking-widest uppercase">
+        <span>Scroll</span>
+        <svg class="w-4 h-4 motion-safe:animate-bounce" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+      </div>
+    </Fragment>
+  </Hero>
+
+  <!-- ============ SECTION 2 · VENTURE INDEX ============ -->
+  <section id="venture-section" class="relative overflow-hidden max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+    <p data-reveal class="text-xs tracking-widest uppercase text-bizvault-amber">Group Ventures &amp; Operations</p>
+
+    <!-- DESKTOP: editorial hover-reveal list -->
+    <div id="venture-list" class="hidden lg:block mt-12">
+      {ventures.map((v) => (
+        <a
+          href="#"
+          class="venture-row group relative flex items-center gap-6 border-t border-bizvault-border py-7"
+          data-venture={v.slug}
+          data-from={v.from}
+          data-to={v.to}
+          data-name={v.name}
+        >
+          <span class="v-index inline-block font-display text-sm text-bizvault-muted w-10 shrink-0">{v.num}</span>
+          <span class="v-logo flex h-11 w-28 shrink-0 items-center">
+            {v.logo && (
+              <img
+                src={v.logo}
+                alt={`${v.name} logo`}
+                width="160"
+                height="44"
+                loading="lazy"
+                decoding="async"
+                class="venture-logo h-full w-auto max-w-full object-contain object-left"
+                onerror="this.style.display='none'"
+              />
+            )}
+          </span>
+          <span class="flex-1">
+            <span class="v-name inline-flex flex-col items-start font-display font-black uppercase leading-none text-3xl xl:text-5xl text-white">
+              <span>{v.name}</span>
+              <span class="v-line" aria-hidden="true"></span>
+            </span>
+          </span>
+          <span class="hidden xl:block text-bizvault-muted text-sm text-right leading-snug shrink-0">{v.sector}<br />{v.location}</span>
+          <span class="v-arrow text-bizvault-amber shrink-0">
+            <span class="v-arrow-inner inline-block">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+            </span>
+          </span>
+        </a>
+      ))}
+      <div class="border-t border-bizvault-border"></div>
+    </div>
+
+    <!-- Floating preview tile (desktop hover). Gradient + name set per venture via JS;
+         data-venture marks where a real logo/thumbnail can replace the gradient later. -->
+    <div id="venture-preview" class="pointer-events-none absolute top-0 left-0 z-20 hidden lg:block">
+      <div id="venture-preview-inner" class="venture-inner w-[230px] h-[158px] rounded-xl overflow-hidden shadow-2xl relative">
+        <div id="venture-preview-bg" class="absolute inset-0"></div>
+        <div class="absolute inset-0 bg-black/10 flex flex-col justify-between p-4">
+          <span class="text-[10px] uppercase tracking-widest text-white/80">View Venture</span>
+          <span id="venture-preview-name" class="font-display font-black text-2xl text-white"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOBILE / TOUCH: stacked premium cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12 lg:hidden">
+      {ventures.map((v) => (
+        <div data-reveal data-venture={v.slug} class="rounded-xl overflow-hidden border border-bizvault-border bg-bizvault-surface">
+          <!-- LOGO: accent gradient header — swap for real venture logo later -->
+          <div class="h-28 flex items-end p-4" style={`background-image:linear-gradient(135deg, ${v.from}, ${v.to})`}>
+            <span class="font-display font-black text-xl text-white">{v.name}</span>
+          </div>
+          <div class="p-5">
+            {v.logo && (
+              <img
+                src={v.logo}
+                alt={`${v.name} logo`}
+                width="160"
+                height="44"
+                loading="lazy"
+                decoding="async"
+                class="h-8 w-auto max-w-[60%] object-contain object-left mb-4"
+                onerror="this.style.display='none'"
+              />
+            )}
+            <p class="text-bizvault-amber text-xs tracking-widest uppercase">{v.sector}</p>
+            <p class="text-bizvault-muted text-sm mt-2 flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-bizvault-amber shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z" /><circle cx="12" cy="11" r="2" /></svg>
+              {v.location}
+            </p>
+            <p class="text-bizvault-muted text-sm mt-3 leading-relaxed">{v.desc}</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              {v.services.map((s) => (
+                <span class="text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-bizvault-border text-bizvault-muted">{s}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ============ SECTION 4 · CTA ============ -->
+  <section class="border-t border-bizvault-border">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32 text-center">
+      <h2 data-reveal class="font-display text-3xl lg:text-5xl">Partner with the BizVault Group.</h2>
+      <div data-reveal data-reveal-delay="0.08" class="mt-8">
+        <a
+          href="/contact"
+          class="inline-block bg-bizvault-amber text-bizvault-bg px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase hover:bg-amber-400 transition"
+        >
+          Submit a Trade Inquiry
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>
+
+<style>
+  /* Infinite marquee */
+  .marquee__track { animation: pf-marquee 25s linear infinite; }
+  .marquee:hover .marquee__track { animation-play-state: paused; }
+  @keyframes pf-marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Venture index hover states (desktop). Classes toggled by JS on server-rendered rows. */
+  .venture-row { transition: opacity 0.3s ease; }
+  #venture-list.is-dimmed .venture-row { opacity: 0.32; }
+  #venture-list.is-dimmed .venture-row.is-active { opacity: 1; }
+
+  /* Name: translate + slight letter-spacing ease, with overshoot easing on activate. */
+  .venture-row .v-name {
+    transition:
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      letter-spacing 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .venture-row.is-active .v-name {
+    transform: translateX(8px);
+    letter-spacing: 0.01em;
+  }
+
+  /* Index number: quick amber emphasis + brightness pop on activate. */
+  .venture-row .v-index {
+    transition: color 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+  }
+  .venture-row.is-active .v-index {
+    color: #F2A93B;
+    transform: scale(1.18);
+    filter: brightness(1.25);
+  }
+  /* Logo: grayscale + dimmed by default; full colour on the active/spotlit row
+     (syncs with the existing dim — non-active rows already fade via .is-dimmed). */
+  .venture-row .venture-logo {
+    filter: grayscale(1);
+    opacity: 0.7;
+    transition: filter 0.25s ease, opacity 0.25s ease;
+  }
+  .venture-row.is-active .venture-logo {
+    filter: grayscale(0);
+    opacity: 1;
+  }
+
+  /* Accent line under the active venture name — scales X 0→1 from the left. */
+  .venture-row .v-line {
+    height: 2px;
+    width: 100%;
+    margin-top: 0.5rem;
+    background-color: #F2A93B;
+    border-radius: 9999px;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .venture-row.is-active .v-line { transform: scaleX(1); }
+
+  /* Arrow: overshoot entrance when active. */
+  .venture-row .v-arrow {
+    opacity: 0;
+    transform: translate(-8px, 8px);
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .venture-row.is-active .v-arrow { opacity: 1; transform: translate(0, 0); }
+  /* Magnetic drift target (set via JS in the rAF loop); eased so it resets cleanly. */
+  .venture-row .v-arrow-inner { transition: transform 0.2s ease-out; }
+
+  /* ===== A1 Spring Bloom — preview grows organically out of the venture name ===== */
+  .venture-inner { opacity: 0; transform-origin: 0% 100%; will-change: transform, opacity, filter; }
+  .venture-inner.is-blooming { animation: ventureBloom 0.7s cubic-bezier(0.34, 1.4, 0.5, 1) forwards; }
+  .venture-inner.is-leaving { animation: ventureLeave 0.34s ease-in forwards; }
+  @keyframes ventureBloom {
+    0%   { opacity: 0; transform: translate(-10px, 8px) scale(0.1); filter: blur(9px); }
+    55%  { opacity: 1; transform: translate(2px, -2px) scale(1.07); filter: blur(0); }
+    78%  { transform: translate(0, 0) scale(0.98); filter: blur(0); }
+    100% { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+  }
+  @keyframes ventureLeave {
+    0%   { opacity: 1; transform: translate(0, 0) scale(1); filter: blur(0); }
+    100% { opacity: 0; transform: translate(-8px, 5px) scale(0.4); filter: blur(4px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee__track { animation: none; }
+    .venture-inner.is-blooming, .venture-inner.is-leaving { animation: none; }
+  }
+</style>
+
+<!-- Hero mask reveal + stats count-up (GSAP/ScrollTrigger configured globally in Layout) -->
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Hero headline word-mask reveal on load
+  const heroWords = gsap.utils.toArray<HTMLElement>('.hero-word');
+  if (heroWords.length && !reduce) {
+    gsap.set(heroWords, { yPercent: 115 });
+    gsap.to(heroWords, { yPercent: 0, duration: 0.9, stagger: 0.08, ease: 'power3.out', delay: 0.1 });
+  }
+
+</script>
+
+<!-- Venture index: desktop hover-dim + cursor-following preview tile -->
+<script>
+  const reduceV = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canHover = window.matchMedia('(min-width: 1024px) and (pointer: fine)').matches;
+
+  const section = document.getElementById('venture-section');
+  const list = document.getElementById('venture-list');
+  const preview = document.getElementById('venture-preview');
+  const previewInner = document.getElementById('venture-preview-inner');
+  const previewBg = document.getElementById('venture-preview-bg');
+  const previewName = document.getElementById('venture-preview-name');
+
+  if (section && list && preview && previewInner && previewBg && previewName && canHover && !reduceV) {
+    const rows = Array.from(list.querySelectorAll<HTMLElement>('.venture-row'));
+    const HALF_W = 115;
+    const HALF_H = 79;
+    const OFFSET_X = 24;            // trail the cursor to the right with a little weight
+    const EDGE = 18;               // keep the whole tile this far inside the section
+    const MAX_TILT = 8;            // velocity tilt clamp (deg)
+    const TILT_PER_PX = 0.35;      // px/frame of horizontal velocity → degrees
+
+    let tx = 0, ty = 0, cx = 0, cy = 0;       // preview target / current position
+    let prevTx = 0;                            // previous-frame target x (for velocity)
+    let rot = 0;                               // tilt — rests at 0 (upright), not a fixed angle
+    let pointerX = 0, pointerY = 0;            // raw pointer (section-relative) for arrow magnetism
+    let activeRow: HTMLElement | null = null;
+    let visible = false;
+    let lastForm = { x: 0, y: 0 };             // last name-origin (for reverse-to-name on exit)
+    let rafId = 0, running = false;
+
+    // Tile top-left so the bloom seed (inner's bottom-left, transform-origin 0% 100%)
+    // sits ON the venture name — the card visibly emanates from the text.
+    const namePos = (row: HTMLElement) => {
+      const nameEl = row.querySelector<HTMLElement>('.v-name');
+      const sr = section.getBoundingClientRect();
+      const nr = (nameEl || row).getBoundingClientRect();
+      const tileH = previewInner.offsetHeight || 158;
+      return { x: nr.left - sr.left, y: (nr.top - sr.top + nr.height / 2) - tileH };
+    };
+    const render = () => {
+      // Clamp the target so the WHOLE tile stays inside the section (never hard-clips at edges).
+      const tileW = previewInner.offsetWidth || 230;
+      const tileH = previewInner.offsetHeight || 158;
+      const maxX = Math.max(EDGE, section.clientWidth - tileW - EDGE);
+      const maxY = Math.max(EDGE, section.clientHeight - tileH - EDGE);
+      const ctx = Math.min(Math.max(tx, EDGE), maxX);
+      const cty = Math.min(Math.max(ty, EDGE), maxY);
+
+      // Position: lerp current toward clamped target (trailing weight + glide-to-stop at edges).
+      cx += (ctx - cx) * 0.15;
+      cy += (cty - cy) * 0.15;
+
+      // Velocity tilt: horizontal cursor velocity → rotation; eases to 0 (upright) when still.
+      const vx = tx - prevTx;
+      prevTx = tx;
+      let velTilt = vx * TILT_PER_PX;
+      if (velTilt > MAX_TILT) velTilt = MAX_TILT;
+      else if (velTilt < -MAX_TILT) velTilt = -MAX_TILT;
+      rot += (velTilt - rot) * 0.12;          // target is pure velocity → 0 at rest
+      if (Math.abs(rot) < 0.02) rot = 0;
+
+      preview.style.transform = `translate(${cx}px, ${cy}px) rotate(${rot}deg)`;
+
+      // Arrow magnetic drift on the active row.
+      if (activeRow) {
+        const inner = activeRow.querySelector<HTMLElement>('.v-arrow-inner');
+        if (inner) {
+          const ar = activeRow.getBoundingClientRect();
+          const sr = section.getBoundingClientRect();
+          const arrowCx = ar.right - sr.left - 18;
+          const arrowCy = ar.top + ar.height / 2 - sr.top;
+          const dx = Math.max(-6, Math.min(6, (pointerX - arrowCx) * 0.06));
+          const dy = Math.max(-6, Math.min(6, (pointerY - arrowCy) * 0.06));
+          inner.style.transform = `translate(${dx}px, ${dy}px)`;
+        }
+      }
+
+      rafId = requestAnimationFrame(render);
+    };
+
+    const startLoop = () => { if (!running) { running = true; render(); } };
+
+    list.addEventListener('mousemove', (e) => {
+      const r = section.getBoundingClientRect();
+      pointerX = e.clientX - r.left;
+      pointerY = e.clientY - r.top;
+      tx = pointerX + OFFSET_X - HALF_W;
+      ty = pointerY - HALF_H;
+    });
+
+    list.addEventListener('mouseenter', () => {
+      list.classList.add('is-dimmed');
+    });
+
+    list.addEventListener('mouseleave', () => {
+      list.classList.remove('is-dimmed');
+      rows.forEach((r) => {
+        r.classList.remove('is-active');
+        r.style.transitionDelay = '';
+        const inner = r.querySelector<HTMLElement>('.v-arrow-inner');
+        if (inner) inner.style.transform = '';
+      });
+      activeRow = null;
+      visible = false;
+      // Reverse: drift back toward the last name origin while shrinking + fading, then hide.
+      tx = lastForm.x; ty = lastForm.y;
+      previewInner.classList.remove('is-blooming', 'is-leaving');
+      void previewInner.offsetWidth;
+      previewInner.classList.add('is-leaving');
+      rot = 0;
+      window.setTimeout(() => {
+        if (!visible && running) { cancelAnimationFrame(rafId); running = false; }
+      }, 360);
+    });
+
+    rows.forEach((row, i) => {
+      row.addEventListener('mouseenter', () => {
+        activeRow = row;
+        rows.forEach((r, j) => {
+          r.classList.toggle('is-active', r === row);
+          r.style.transitionDelay = r === row ? '0ms' : `${Math.abs(j - i) * 40}ms`;
+        });
+        previewBg.style.backgroundImage = `linear-gradient(135deg, ${row.dataset.from}, ${row.dataset.to})`;
+        previewName.textContent = row.dataset.name || '';
+
+        if (!visible) {
+          // A1 SPRING BLOOM: the card grows organically out of the venture name (seed at
+          // the name, soft spring overshoot + blur-sharpen), then the rAF loop flows it to
+          // the cursor — the loop starts at the same name position, so there's no seam.
+          visible = true;
+          const p = namePos(row);
+          lastForm = p;
+          cx = p.x; cy = p.y; prevTx = tx; rot = 0;
+          // (Re)trigger the bloom animation on the inner tile.
+          previewInner.classList.remove('is-blooming', 'is-leaving');
+          void previewInner.offsetWidth;
+          previewInner.classList.add('is-blooming');
+          startLoop();
+        } else {
+          // Already formed — just remember this name as the reverse origin.
+          lastForm = namePos(row);
+        }
+      });
+      row.addEventListener('click', (e) => e.preventDefault());
+    });
+
+    // initial state: inner hidden via CSS (.venture-inner opacity:0); wrapper at origin.
+    preview.style.transform = 'translate(0px, 0px) rotate(0deg)';
+  }
+</script>

@@ -1,0 +1,124 @@
+---
+// Calm amber grid background with a slow periodic light-sweep. Quieter than the network.
+// Fixed behind content at low opacity. Single rAF, DPR-aware, pauses tab-hidden/off-screen,
+// reduced (no sweep / fewer cells) + no pointer-reactivity on mobile, static frame under
+// reduced-motion. pointer-events:none; mouse tracked via window so UI stays clickable.
+---
+
+<div class="cg-bg" aria-hidden="true"><canvas data-cg-canvas></canvas></div>
+
+<style>
+  .cg-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .cg-bg canvas { display: block; width: 100%; height: 100%; }
+</style>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('.cg-bg');
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas[data-cg-canvas]');
+  const ctx = canvas?.getContext('2d');
+
+  if (wrap && canvas && ctx) {
+    const AMBER = '242, 169, 59';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mqMobile = window.matchMedia('(max-width: 767px)');
+    const interactive = () => window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
+
+    let W = 0, H = 0, raf = 0, running = false;
+    const mouse = { x: -9999, y: -9999, active: false };
+    let ripples: { x: number; y: number; t: number }[] = [];
+    const gap = () => (mqMobile.matches ? 64 : 48);
+
+    function size() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      const G = gap();
+      const react = interactive() && !mqMobile.matches;
+      const now = performance.now();
+      ripples = ripples.filter((r) => now - r.t < 900);
+
+      // sweep position (slow, periodic)
+      const sweepX = reduce ? -9999 : ((now / 7000) % 1) * (W + 300) - 150;
+
+      // base grid lines, brightened near the sweep
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= W; x += G) {
+        const near = Math.max(0, 1 - Math.abs(x - sweepX) / 160);
+        ctx.strokeStyle = `rgba(${AMBER}, ${0.02 + near * 0.12})`;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+      }
+      for (let y = 0; y <= H; y += G) {
+        ctx.strokeStyle = `rgba(255, 255, 255, 0.025)`;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      }
+
+      // sweep glow band
+      if (!reduce && sweepX > -150 && sweepX < W + 150) {
+        const g = ctx.createLinearGradient(sweepX - 120, 0, sweepX + 120, 0);
+        g.addColorStop(0, `rgba(${AMBER}, 0)`);
+        g.addColorStop(0.5, `rgba(${AMBER}, 0.04)`);
+        g.addColorStop(1, `rgba(${AMBER}, 0)`);
+        ctx.fillStyle = g; ctx.fillRect(sweepX - 120, 0, 240, H);
+      }
+
+      // spotlight on intersections near cursor
+      if (react && mouse.active) {
+        const R = 120;
+        const x0 = Math.max(0, Math.floor((mouse.x - R) / G) * G);
+        const x1 = Math.min(W, mouse.x + R);
+        const y0 = Math.max(0, Math.floor((mouse.y - R) / G) * G);
+        const y1 = Math.min(H, mouse.y + R);
+        for (let x = x0; x <= x1; x += G) {
+          for (let y = y0; y <= y1; y += G) {
+            const d = Math.hypot(mouse.x - x, mouse.y - y);
+            if (d < R) {
+              ctx.fillStyle = `rgba(${AMBER}, ${(1 - d / R) * 0.5})`;
+              ctx.beginPath(); ctx.arc(x, y, 1.6, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        }
+      }
+
+      // click ripple — intersections light up in an expanding ring
+      for (const r of ripples) {
+        const age = (now - r.t) / 900, radius = age * 460;
+        for (let x = 0; x <= W; x += G) {
+          for (let y = 0; y <= H; y += G) {
+            const d = Math.hypot(x - r.x, y - r.y);
+            if (Math.abs(d - radius) < 26) {
+              ctx.fillStyle = `rgba(${AMBER}, ${(1 - age) * 0.55})`;
+              ctx.beginPath(); ctx.arc(x, y, 1.8, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+        }
+      }
+    }
+
+    function loop() { frame(); raf = requestAnimationFrame(loop); }
+    function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+
+    size();
+    if (reduce) {
+      frame();
+    } else {
+      if (interactive() && !mqMobile.matches) {
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+        window.addEventListener('blur', () => { mouse.active = false; });
+        window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      }
+      let rt = 0;
+      window.addEventListener('resize', () => { clearTimeout(rt); rt = window.setTimeout(size, 200); });
+      document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
+      const io = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? start() : stop())); });
+      io.observe(wrap);
+      start();
+    }
+  }
+</script>

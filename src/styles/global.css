@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Archivo', 'Inter', system-ui, sans-serif;
+
+  --color-bizvault-bg: #09090A;
+  --color-bizvault-surface: #0F0F12;
+  --color-bizvault-amber: #F2A93B;
+  --color-bizvault-amber-deep: #C9821F;
+  --color-bizvault-text: #FAFAFA;
+  --color-bizvault-muted: #9A9AA2;
+  --color-bizvault-border: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+details summary::-webkit-details-marker {
+  display: none;
+}
+
+details summary {
+  list-style: none;
+}
+
+details[open] .faq-plus {
+  display: none;
+}
+
+details:not([open]) .faq-minus {
+  display: none;
+}

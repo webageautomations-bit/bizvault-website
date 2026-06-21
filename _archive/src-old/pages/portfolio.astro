@@ -1,0 +1,146 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const ventures = [
+  {
+    number: '01',
+    category: 'Real Estate',
+    title: 'Real Estate Sales & Marketing',
+    location: 'Lahore, Pakistan',
+    tags: ['Sales Strategy', 'Marketing Execution', 'Pakistan Market'],
+    desc: 'Structured sales and marketing operations for large-scale real estate developments in Lahore, Pakistan. End-to-end campaign management, buyer engagement, and transaction facilitation for high-value property portfolios.',
+  },
+  {
+    number: '02',
+    category: 'Technology',
+    title: 'AI & Smart Systems Deployment',
+    location: 'UAE / Pakistan / North America',
+    tags: ['Artificial Intelligence', 'Systems Integration', 'Multi-Region'],
+    desc: 'Strategic deployment of AI-driven systems and smart infrastructure solutions across the UAE, Pakistan, and North American markets. Includes procurement, integration, and operational handover of intelligent enterprise systems.',
+  },
+  {
+    number: '03',
+    category: 'Brand & Digital',
+    title: 'Brand Strategy & Digital Execution',
+    location: 'Middle East / South Asia / North America',
+    tags: ['Brand Development', 'Digital Strategy', 'Multi-Market'],
+    desc: 'Comprehensive brand strategy and digital execution services delivered across three major regions. Covering identity development, digital channel management, and market-specific communications for enterprise clients.',
+  },
+  {
+    number: '04',
+    category: 'Engineering',
+    title: 'Engineering & Infrastructure Development',
+    location: 'Pakistan',
+    tags: ['Civil Engineering', 'Infrastructure', 'Project Management'],
+    desc: 'Large-scale engineering and infrastructure development projects across Pakistan. Covers structural works, utilities, and civil infrastructure requiring multi-vendor coordination and regulatory compliance.',
+  },
+  {
+    number: '05',
+    category: 'Manufacturing & Export',
+    title: 'Apparel Manufacturing & Export',
+    location: 'South Asia ↔ Europe / Ukraine / US / MENA',
+    tags: ['Manufacturing', 'Export Trade', 'Multi-Corridor'],
+    desc: 'End-to-end apparel manufacturing and export facilitation connecting South Asian production capacity with buyers in Europe, Ukraine, the United States, and MENA markets. Covers sourcing, quality control, freight, and compliance.',
+  },
+];
+---
+
+<Layout title="Portfolio" description="BizVault active ventures across real estate, AI, engineering, and international trade.">
+
+  <!-- ─── HERO ─────────────────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 py-24 lg:py-36">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <p class="text-xs font-semibold tracking-[0.3em] text-zinc-500 uppercase mb-8">
+        Active Ventures
+      </p>
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none uppercase text-white max-w-4xl">
+        Projects That Move Markets.
+      </h1>
+      <p class="mt-8 text-base text-zinc-500 max-w-2xl leading-relaxed">
+        A curated view of BizVault's active engagements — spanning real estate, technology, engineering, and international trade across three continents.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── STATS ─────────────────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 bg-[#0d0d0d]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-zinc-800/60">
+        {[
+          { value: '5',  label: 'Active Ventures' },
+          { value: '12', label: 'Markets Reached' },
+          { value: '6',  label: 'Trade Verticals' },
+          { value: '3',  label: 'Continents' },
+        ].map((stat) => (
+          <div class="px-8 py-10 text-center">
+            <p class="text-4xl md:text-5xl font-black text-white tracking-tight">{stat.value}</p>
+            <p class="mt-2 text-xs font-medium tracking-widest uppercase text-zinc-500">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── VENTURES ─────────────────────────────────────────────────────────── -->
+  <section class="py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex flex-col gap-px bg-zinc-800/40">
+        {ventures.map((venture) => (
+          <div class="bg-[#0a0a0a] p-8 lg:p-12">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
+              <div class="flex-1">
+                <div class="flex items-center gap-4 mb-6">
+                  <span class="text-xs font-semibold tracking-[0.2em] text-zinc-700">{venture.number}</span>
+                  <span class="text-xs font-semibold tracking-widest uppercase text-zinc-500 border border-zinc-800 px-3 py-1">
+                    {venture.category}
+                  </span>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-black text-white uppercase tracking-tight leading-tight mb-3">
+                  {venture.title}
+                </h2>
+                <p class="text-sm text-zinc-500 mb-6 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  {venture.location}
+                </p>
+                <p class="text-sm text-zinc-500 leading-relaxed max-w-2xl">{venture.desc}</p>
+              </div>
+              <div class="flex flex-wrap gap-2 lg:flex-col lg:items-end lg:gap-2 lg:min-w-fit">
+                {venture.tags.map((tag) => (
+                  <span class="text-xs font-medium tracking-wide text-zinc-600 bg-zinc-900 border border-zinc-800 px-3 py-1.5 whitespace-nowrap">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── INQUIRY CTA ───────────────────────────────────────────────────────── -->
+  <section class="border-t border-zinc-800/60 py-24 lg:py-32 bg-[#0d0d0d]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+        <div>
+          <h2 class="text-2xl md:text-3xl font-black tracking-tight text-white uppercase mb-3">
+            Add Your Project to the List.
+          </h2>
+          <p class="text-sm text-zinc-500 max-w-xl leading-relaxed">
+            Complex trade requirements demand structured execution. BizVault is built for exactly that.
+          </p>
+        </div>
+        <a
+          href="/contact"
+          class="shrink-0 inline-flex items-center justify-center px-7 py-3.5 text-xs font-semibold tracking-widest uppercase text-black bg-white hover:bg-zinc-200 transition-colors"
+        >
+          Submit a Trade Inquiry
+        </a>
+      </div>
+    </div>
+  </section>
+
+</Layout>

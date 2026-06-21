@@ -1,0 +1,782 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import DriftingNetwork from '../components/DriftingNetwork.astro';
+
+// icon keys map to inline SVG paths rendered below
+const capabilities = [
+  {
+    n: '01',
+    title: 'Procurement & Sourcing',
+    desc: 'Multi-market supplier identification, vetting, and procurement for industrial and commercial requirements.',
+    icon: 'search',
+    feature: true,
+    span: 'lg:col-span-2',
+  },
+  {
+    n: '02',
+    title: 'Logistics Coordination',
+    desc: 'Freight planning, carrier management, and shipment tracking from origin to final destination.',
+    icon: 'truck',
+    feature: false,
+    span: 'lg:col-span-1',
+  },
+  {
+    n: '03',
+    title: 'Compliance & Documentation',
+    desc: 'Cross-border regulatory compliance, customs documentation, and trade-paperwork accuracy.',
+    icon: 'shield',
+    feature: false,
+    span: 'lg:col-span-1',
+  },
+  {
+    n: '04',
+    title: 'Customs Clearance',
+    desc: 'End-to-end customs handling across international trade corridors.',
+    icon: 'clipboard',
+    feature: false,
+    span: 'lg:col-span-1',
+  },
+  {
+    n: '05',
+    title: 'Project Trade Facilitation',
+    desc: 'Turnkey coordination for infrastructure, bottling plant, and utility project supply chains.',
+    icon: 'network',
+    feature: true,
+    span: 'lg:col-span-2',
+  },
+  {
+    n: '06',
+    title: 'Supplier Stream Management',
+    desc: 'Parallel multi-country supplier streams managed as one coordinated operation.',
+    icon: 'branch',
+    feature: false,
+    span: 'lg:col-span-1',
+  },
+  {
+    n: '07',
+    title: 'Quality & Inspection Oversight',
+    desc: 'Structured inspection and documentation checkpoints across the supply chain.',
+    icon: 'badge',
+    feature: false,
+    span: 'lg:col-span-2',
+  },
+  {
+    n: '08',
+    title: 'Last-Mile Delivery',
+    desc: 'Final-leg coordination from port to project site, managed end-to-end.',
+    icon: 'pin',
+    feature: false,
+    span: 'lg:col-span-2',
+  },
+];
+
+// glow = literal Tailwind bg class for the corner blob (kept literal for the v4 scanner)
+const verticals = [
+  {
+    n: '01',
+    title: 'Industrial & Commercial Equipment',
+    desc: 'Sourcing, procurement, and delivery of heavy industrial and commercial machinery across international markets.',
+    icon: 'gear',
+    tag: 'Equipment',
+    glow: 'bg-bizvault-amber/15',
+  },
+  {
+    n: '02',
+    title: 'Mega Infrastructure Movements',
+    desc: 'End-to-end facilitation of large-scale infrastructure trade — civil, mechanical, and utility project supply chains.',
+    icon: 'building',
+    tag: 'Infrastructure',
+    glow: 'bg-sky-500/15',
+  },
+  {
+    n: '03',
+    title: 'Bottling Plants',
+    desc: 'Turnkey supply and coordination of bottling plant equipment — sourcing, documentation, and installation support.',
+    icon: 'bottle',
+    tag: 'Bottling',
+    glow: 'bg-teal-500/15',
+  },
+  {
+    n: '04',
+    title: 'Water Parks & Utility Projects',
+    desc: 'Specialised procurement and trade support for water park infrastructure and large-scale utility development projects.',
+    icon: 'droplet',
+    tag: 'Utility',
+    glow: 'bg-emerald-500/15',
+  },
+  {
+    n: '05',
+    title: 'Specialised Project Trade',
+    desc: 'Bespoke trade facilitation for complex, multi-country sourcing requirements across industrial and commercial sectors.',
+    icon: 'layers',
+    tag: 'Bespoke',
+    glow: 'bg-bizvault-amber-deep/20',
+  },
+];
+
+const steps = [
+  {
+    n: '01',
+    title: 'Inquiry & Scope Review',
+    desc: 'We review project scope, sourcing requirements, and regional considerations.',
+  },
+  {
+    n: '02',
+    title: 'Sourcing & Structuring',
+    desc: 'Suppliers are identified, vetted, and the procurement structure is set.',
+  },
+  {
+    n: '03',
+    title: 'Logistics & Compliance',
+    desc: 'Freight, customs, and cross-border documentation are coordinated.',
+  },
+  {
+    n: '04',
+    title: 'Delivery & Follow-Through',
+    desc: 'Goods reach the project site with structured, documented follow-through.',
+  },
+];
+
+// Minimal line-icon path markup, stroke=currentColor. Rendered with set:html.
+const icons: Record<string, string> = {
+  search:
+    '<circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>',
+  truck:
+    '<path d="M1 3h15v13H1z"></path><path d="M16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2"></circle><circle cx="18.5" cy="18.5" r="2"></circle>',
+  shield:
+    '<path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7l8-4z"></path><polyline points="9 12 11 14 15 10"></polyline>',
+  clipboard:
+    '<rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"></path><line x1="9" y1="11" x2="15" y2="11"></line><line x1="9" y1="15" x2="13" y2="15"></line>',
+  network:
+    '<circle cx="6" cy="6" r="3"></circle><circle cx="18" cy="6" r="3"></circle><circle cx="12" cy="18" r="3"></circle><line x1="8.5" y1="7.5" x2="10.5" y2="15.5"></line><line x1="15.5" y1="7.5" x2="13.5" y2="15.5"></line><line x1="9" y1="6" x2="15" y2="6"></line>',
+  branch:
+    '<circle cx="6" cy="5" r="2.5"></circle><circle cx="6" cy="19" r="2.5"></circle><circle cx="18" cy="12" r="2.5"></circle><path d="M6 7.5v9"></path><path d="M6 12h6a3.5 3.5 0 0 0 3.5-3.5V8"></path>',
+  badge:
+    '<path d="M12 2l2.4 1.7 2.9-.3 1 2.8 2.5 1.5-.6 2.9 1.4 2.6-2.1 2 .1 3-2.9.7-1.6 2.5-2.8-1-2.8 1-1.6-2.5-2.9-.7.1-3-2.1-2 1.4-2.6-.6-2.9L4.7 6.2l1-2.8 2.9.3z"></path><polyline points="9 12 11 14 15 10"></polyline>',
+  pin: '<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle>',
+  gear: '<circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"></path>',
+  building:
+    '<rect x="4" y="3" width="16" height="18" rx="1"></rect><line x1="8" y1="7" x2="8" y2="7"></line><line x1="12" y1="7" x2="12" y2="7"></line><line x1="16" y1="7" x2="16" y2="7"></line><line x1="8" y1="11" x2="8" y2="11"></line><line x1="12" y1="11" x2="12" y2="11"></line><line x1="16" y1="11" x2="16" y2="11"></line><path d="M10 21v-4h4v4"></path>',
+  bottle:
+    '<path d="M10 2h4v3l1.5 2A3 3 0 0 1 16 9v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9a3 3 0 0 1 .5-2L10 5z"></path><line x1="8" y1="13" x2="16" y2="13"></line>',
+  droplet: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path>',
+  layers:
+    '<polygon points="12 3 21 8 12 13 3 8 12 3"></polygon><polyline points="3 13 12 18 21 13"></polyline>',
+};
+---
+
+<Layout
+  title="Services"
+  description="BizVault manages the full lifecycle of international trade — procurement, logistics, and compliance — engineered for large-scale industrial and infrastructure movements."
+>
+  <DriftingNetwork />
+
+  <!-- Page Hero -->
+  <Hero
+    eyebrow="Services"
+    subhead="BizVault manages the full lifecycle of international trade — procurement, logistics, and compliance — engineered for large-scale industrial and infrastructure movements."
+  >
+    <Fragment slot="bg">
+      <!-- atmosphere: faint amber radial glow -->
+      <span class="hero-glow pointer-events-none absolute -top-24 -left-24 h-[34rem] w-[34rem] rounded-full bg-bizvault-amber/10 blur-3xl" aria-hidden="true"></span>
+      <!-- atmosphere: low-opacity blueprint grid -->
+      <span class="hero-grid pointer-events-none absolute inset-0" aria-hidden="true"></span>
+      <!-- atmosphere: concentric ring motif (desktop) -->
+      <svg
+        class="hero-rings pointer-events-none absolute right-[-8rem] top-1/2 hidden -translate-y-1/2 text-bizvault-amber/10 lg:block"
+        width="640" height="640" viewBox="0 0 640 640" fill="none" aria-hidden="true"
+      >
+        <circle cx="320" cy="320" r="120" stroke="currentColor" stroke-width="1"></circle>
+        <circle cx="320" cy="320" r="190" stroke="currentColor" stroke-width="1"></circle>
+        <circle cx="320" cy="320" r="260" stroke="currentColor" stroke-width="1"></circle>
+        <circle cx="320" cy="320" r="320" stroke="currentColor" stroke-width="1" stroke-dasharray="2 10"></circle>
+      </svg>
+    </Fragment>
+
+    <Fragment slot="headline">Capabilities Built for Complex Trade<span class="text-bizvault-amber">.</span></Fragment>
+
+    <Fragment slot="cta">
+      <a
+        href="/contact"
+        class="bg-bizvault-amber text-bizvault-bg px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase hover:bg-amber-400 transition"
+      >
+        Submit a Trade Inquiry
+      </a>
+      <a
+        href="#verticals"
+        class="border border-bizvault-border px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase text-bizvault-text transition hover:border-bizvault-amber hover:text-bizvault-amber"
+      >
+        View Trade Verticals
+      </a>
+    </Fragment>
+  </Hero>
+
+  <!-- Core Capabilities -->
+  <section class="py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <p class="text-xs tracking-widest uppercase text-bizvault-amber" data-reveal>Core Capabilities</p>
+      <h2 class="mt-5 font-display font-black tracking-tight text-3xl lg:text-4xl" data-reveal data-reveal-delay="0.05">
+        End-to-end trade capability.
+      </h2>
+      <div class="bento-grid mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {capabilities.map((item, i) => (
+          <div
+            class={`group relative flex flex-col overflow-hidden rounded-xl border border-bizvault-border bg-gradient-to-br from-bizvault-surface to-[#15151a] p-6 transition duration-[250ms] hover:-translate-y-1 hover:border-bizvault-amber ${item.span}`}
+            data-reveal
+            data-reveal-delay={(i * 0.06).toFixed(2)}
+          >
+            <span
+              class={`pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full bg-bizvault-amber/0 blur-2xl transition duration-[250ms] ${item.feature ? 'group-hover:bg-bizvault-amber/25' : 'group-hover:bg-bizvault-amber/15'}`}
+              aria-hidden="true"
+            />
+            <div class="relative z-10 flex items-center justify-between">
+              <svg
+                class="h-[26px] w-[26px] text-bizvault-amber transition-colors duration-[250ms] group-hover:text-amber-300"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                set:html={icons[item.icon]}
+              />
+              <span class="font-display font-bold text-bizvault-amber text-sm tracking-widest">{item.n}</span>
+            </div>
+            <h3 class={`relative z-10 mt-5 font-display font-bold text-white ${item.feature ? 'text-2xl' : 'text-lg'}`}>
+              {item.title}
+            </h3>
+            <p class="relative z-10 mt-3 text-bizvault-muted text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Trade Verticals -->
+  <section id="verticals" class="py-24 lg:py-32 scroll-mt-24" data-verticals>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p class="text-xs tracking-widest uppercase text-bizvault-amber" data-reveal>Trade Verticals</p>
+          <h2 class="mt-5 font-display font-black tracking-tight text-3xl lg:text-4xl max-w-xl" data-reveal data-reveal-delay="0.05">
+            Five verticals. One execution standard.
+          </h2>
+        </div>
+        <div class="flex items-center gap-3" data-reveal data-reveal-delay="0.1">
+          <button
+            type="button"
+            data-vert-prev
+            aria-label="Previous vertical"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-bizvault-border text-bizvault-text transition hover:border-bizvault-amber hover:text-bizvault-amber"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button
+            type="button"
+            data-vert-next
+            aria-label="Next vertical"
+            class="flex h-11 w-11 items-center justify-center rounded-full border border-bizvault-border text-bizvault-text transition hover:border-bizvault-amber hover:text-bizvault-amber"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      data-vert-track
+      class="vert-track mt-12 flex gap-6 overflow-x-auto pb-4 max-w-7xl mx-auto"
+    >
+      {verticals.map((item) => (
+        <article
+          class="vert-panel group relative flex w-[80vw] sm:w-[440px] shrink-0 flex-col justify-between overflow-hidden rounded-2xl border bg-gradient-to-br from-bizvault-surface to-[#15151a] p-8"
+          style="min-height:420px;"
+        >
+          <span
+            class={`vert-glow pointer-events-none absolute -top-12 -right-12 h-56 w-56 rounded-full blur-3xl transition-opacity duration-300 ${item.glow}`}
+            aria-hidden="true"
+          />
+          <div class="relative z-10">
+            <span class="font-display font-black text-bizvault-amber text-5xl">{item.n}</span>
+            <h3 class="mt-6 font-display font-bold text-2xl text-white">{item.title}</h3>
+            <p class="mt-4 text-bizvault-muted leading-relaxed">{item.desc}</p>
+          </div>
+          <div class="relative z-10 mt-8 flex items-center gap-3 border-t border-bizvault-border pt-5">
+            <svg
+              class="h-5 w-5 text-bizvault-amber"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={icons[item.icon]}
+            />
+            <span class="text-xs tracking-widest uppercase text-bizvault-muted">{item.tag}</span>
+          </div>
+        </article>
+      ))}
+      <!-- trailing spacer: gives the final card room to scroll into the centered/active zone -->
+      <span class="vert-spacer shrink-0" aria-hidden="true"></span>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="mt-8 flex items-center gap-6">
+        <div class="relative h-px flex-1 bg-bizvault-border">
+          <div data-vert-progress class="absolute inset-y-0 left-0 w-0 bg-bizvault-amber"></div>
+        </div>
+        <div class="font-display text-sm tracking-widest text-bizvault-muted">
+          <span data-vert-current class="text-bizvault-amber">01</span> / 05
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="py-24 lg:py-32" data-process>
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <p class="text-xs tracking-widest uppercase text-bizvault-amber" data-reveal>Process</p>
+      <h2 class="mt-5 font-display font-black tracking-tight text-3xl lg:text-4xl max-w-xl" data-reveal data-reveal-delay="0.05">
+        How it works.
+      </h2>
+
+      <!-- Desktop horizontal timeline -->
+      <div class="mt-16 hidden lg:block">
+        <div class="relative">
+          <!-- connector line + node row -->
+          <div class="relative h-3 px-[12.5%]">
+            <div class="absolute top-1/2 left-[12.5%] right-[12.5%] h-0.5 -translate-y-1/2 bg-bizvault-border">
+              <div
+                data-line-h
+                class="proc-fill-h h-full w-full origin-left scale-x-0"
+              ></div>
+              <!-- comet at leading edge -->
+              <span data-comet-h class="proc-comet pointer-events-none absolute top-1/2 left-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bizvault-amber opacity-0"></span>
+            </div>
+          </div>
+          <div class="grid grid-cols-4">
+            {steps.map((step) => (
+              <div class="proc-step flex cursor-pointer flex-col items-center text-center" data-step>
+                <span class="proc-node -mt-[18px] flex h-9 w-9 items-center justify-center rounded-full border border-bizvault-border bg-bizvault-bg font-display font-bold text-sm text-bizvault-muted transition duration-[250ms]">
+                  {step.n}
+                </span>
+                <span class="proc-tick mt-6 block h-3 w-px bg-bizvault-amber/40 transition duration-[250ms]" aria-hidden="true"></span>
+                <h3 class="proc-title mt-3 font-display font-bold text-lg text-bizvault-muted transition duration-[250ms]">
+                  {step.title}
+                </h3>
+                <p class="proc-desc mt-2 max-w-[16rem] text-bizvault-muted text-sm leading-relaxed transition duration-[250ms]">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile vertical timeline -->
+      <div class="mt-12 lg:hidden">
+        <div class="relative">
+          <div class="absolute left-[18px] top-2 bottom-2 w-px bg-bizvault-border">
+            <div data-line-v class="proc-fill-v h-full w-full origin-top scale-y-0"></div>
+            <span data-comet-v class="proc-comet pointer-events-none absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-bizvault-amber opacity-0"></span>
+          </div>
+          <div class="flex flex-col gap-10">
+            {steps.map((step) => (
+              <div class="proc-step relative flex cursor-pointer gap-5" data-step>
+                <span class="proc-node relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-bizvault-border bg-bizvault-bg font-display font-bold text-sm text-bizvault-muted transition duration-[250ms]">
+                  {step.n}
+                </span>
+                <div class="pt-1">
+                  <span class="proc-tick mb-2 block h-px w-6 bg-bizvault-amber/40 transition duration-[250ms]" aria-hidden="true"></span>
+                  <h3 class="proc-title font-display font-bold text-lg text-bizvault-muted transition duration-[250ms]">
+                    {step.title}
+                  </h3>
+                  <p class="proc-desc mt-2 text-bizvault-muted text-sm leading-relaxed transition duration-[250ms]">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Band -->
+  <section class="py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="font-display font-black tracking-tight text-3xl lg:text-5xl">
+        Have a project to move?
+      </h2>
+      <div class="mt-8 flex justify-center">
+        <a
+          href="/contact"
+          class="bg-bizvault-amber text-bizvault-bg px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase hover:bg-amber-400 transition"
+        >
+          Submit a Trade Inquiry
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    /* ===== Core Capabilities bento ===== */
+    /* rows grow to their content so no description is ever cropped;
+       same-row tiles stretch to equal height for clean alignment. */
+    .bento-grid {
+      grid-auto-rows: minmax(min-content, auto);
+    }
+
+    /* ===== Hero atmosphere ===== */
+    .hero-glow {
+      will-change: transform;
+    }
+    .hero-grid {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 56px 56px;
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 30% 40%, #000 30%, transparent 80%);
+      mask-image: radial-gradient(ellipse 70% 60% at 30% 40%, #000 30%, transparent 80%);
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .hero-glow {
+        animation: hero-drift 12s ease-in-out infinite alternate;
+      }
+      .hero-rings {
+        animation: hero-spin 90s linear infinite;
+        transform-origin: center;
+      }
+    }
+    @keyframes hero-drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(3rem, 2rem) scale(1.12); }
+    }
+    @keyframes hero-spin {
+      from { transform: translateY(-50%) rotate(0deg); }
+      to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    /* ===== Horizontal verticals scroller ===== */
+    .vert-track {
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scroll-padding-inline: 1.5rem;
+      padding-inline: 1.5rem;
+      cursor: grab;
+      /* let vertical page scroll pass through; horizontal gestures come to JS as pointer events */
+      touch-action: pan-y;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    }
+    @media (min-width: 1024px) {
+      .vert-track {
+        scroll-padding-inline: 2rem;
+        padding-inline: 2rem;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .vert-track {
+        scroll-behavior: auto;
+      }
+    }
+    .vert-track::-webkit-scrollbar {
+      display: none;
+    }
+    .vert-track.is-grabbing {
+      cursor: grabbing;
+      scroll-behavior: auto;      /* instant scrollLeft writes while dragging (no smooth fighting) */
+      scroll-snap-type: none;     /* don't snap mid-drag; re-enabled on release for the settle */
+      user-select: none;          /* don't start a text selection on drag */
+      -webkit-user-select: none;
+    }
+    /* trailing room so the last card can scroll into the centered/active zone.
+       ~ (track visible width − one card width). negative margin cancels the
+       track's gap before the spacer so the math stays clean. */
+    .vert-spacer {
+      width: max(0px, calc(100vw - 80vw - 3rem));
+      margin-left: -1.5rem;
+    }
+    @media (min-width: 640px) {
+      .vert-spacer {
+        width: max(0px, calc(min(100vw, 80rem) - 440px - 4rem));
+      }
+    }
+    @media (min-width: 1024px) {
+      .vert-spacer {
+        margin-left: -2rem;
+      }
+    }
+    .vert-panel {
+      scroll-snap-align: start;
+      border-color: var(--bizvault-border, rgba(255, 255, 255, 0.08));
+      opacity: 0.6;
+      transition: opacity 350ms ease, border-color 350ms ease, transform 350ms ease;
+    }
+    .vert-panel.is-active {
+      opacity: 1;
+      border-color: rgba(242, 169, 59, 0.55);
+    }
+    .vert-glow {
+      opacity: 0.55;
+    }
+    .vert-panel.is-active .vert-glow {
+      opacity: 1;
+    }
+
+    /* ===== Process timeline ===== */
+    /* drawn fill = amber gradient brighter at the leading edge */
+    .proc-fill-h {
+      background: linear-gradient(to right, rgba(201, 130, 31, 0.65), #f2a93b);
+    }
+    .proc-fill-v {
+      background: linear-gradient(to bottom, rgba(201, 130, 31, 0.65), #f2a93b);
+    }
+    .proc-comet {
+      box-shadow: 0 0 10px 3px rgba(242, 169, 59, 0.8), 0 0 22px 6px rgba(242, 169, 59, 0.45);
+      filter: blur(0.5px);
+    }
+
+    /* active states (toggled by JS) */
+    .proc-step.is-active .proc-node {
+      border-color: #f2a93b;
+      background-color: #f2a93b;
+      color: #09090a;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .proc-step.is-active .proc-node {
+        animation: proc-pulse 2.2s ease-in-out infinite;
+      }
+    }
+    .proc-step.is-active .proc-title {
+      color: #ffffff;
+    }
+    .proc-step.is-active .proc-tick {
+      background-color: #f2a93b;
+    }
+    @keyframes proc-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(242, 169, 59, 0.4), 0 0 14px rgba(242, 169, 59, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(242, 169, 59, 0), 0 0 22px rgba(242, 169, 59, 0.6); }
+    }
+
+    /* hover / tap intensify */
+    .proc-step:hover {
+      transform: translateY(-4px);
+      transition: transform 250ms ease;
+    }
+    .proc-step:hover .proc-node,
+    .proc-step.is-hover .proc-node {
+      transform: scale(1.18);
+      border-color: #f2a93b;
+      box-shadow: 0 0 0 6px rgba(242, 169, 59, 0.16), 0 0 24px rgba(242, 169, 59, 0.6);
+    }
+    .proc-step:hover .proc-title,
+    .proc-step.is-hover .proc-title {
+      color: #f2a93b;
+    }
+    .proc-step:hover .proc-desc,
+    .proc-step.is-hover .proc-desc {
+      color: #d6d6db;
+    }
+    .proc-step:hover .proc-tick,
+    .proc-step.is-hover .proc-tick {
+      background-color: #f2a93b;
+    }
+  </style>
+</Layout>
+
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ===== Hero — word/line mask reveal on load ===== */
+  const heroHeadline = document.querySelector<HTMLElement>('[data-hero-headline]');
+  if (heroHeadline && !reduceMotion) {
+    // wrap each word in an overflow-hidden inline-block with an inner span
+    const words = heroHeadline.textContent?.trim().split(/\s+/) ?? [];
+    heroHeadline.innerHTML = words
+      .map((w) => {
+        // re-amber the trailing period on the final word
+        const html = w.replace(/\.$/, '<span class="text-bizvault-amber">.</span>');
+        return `<span class="hero-word" style="display:inline-block;overflow:hidden;vertical-align:top;"><span class="hero-word-inner" style="display:inline-block;">${html}</span></span>`;
+      })
+      .join(' ');
+    const inners = heroHeadline.querySelectorAll<HTMLElement>('.hero-word-inner');
+    gsap.set(inners, { yPercent: 115 });
+    gsap.to(inners, {
+      yPercent: 0,
+      duration: 0.9,
+      stagger: 0.08,
+      ease: 'power3.out',
+    });
+  }
+
+  /* ===== Trade Verticals — drag/scroll showcase ===== */
+  const track = document.querySelector<HTMLElement>('[data-vert-track]');
+  if (track) {
+    const progress = document.querySelector<HTMLElement>('[data-vert-progress]');
+    const current = document.querySelector<HTMLElement>('[data-vert-current]');
+    const prevBtn = document.querySelector<HTMLElement>('[data-vert-prev]');
+    const nextBtn = document.querySelector<HTMLElement>('[data-vert-next]');
+    const panels = Array.from(track.querySelectorAll<HTMLElement>('.vert-panel'));
+    const total = panels.length;
+
+    const panelStep = () => {
+      if (panels.length < 2) return panels[0]?.offsetWidth ?? track.clientWidth;
+      return panels[1].offsetLeft - panels[0].offsetLeft;
+    };
+
+    /* Counter + progress bar are driven from the active (most-centered) panel
+       so they stay in sync with the IntersectionObserver — no scrollLeft math. */
+    const setActiveIndex = (idx: number) => {
+      const clamped = Math.min(total - 1, Math.max(0, idx));
+      panels.forEach((p, i) => p.classList.toggle('is-active', i === clamped));
+      if (current) current.textContent = String(clamped + 1).padStart(2, '0');
+      if (progress) {
+        const ratio = total > 1 ? clamped / (total - 1) : 1;
+        progress.style.width = `${Math.min(100, Math.max(0, ratio * 100))}%`;
+      }
+    };
+
+    setActiveIndex(0);
+
+    /* Active panel = most-centered (highest intersection ratio) within the track */
+    if ('IntersectionObserver' in window) {
+      const ratios = new Map<Element, number>();
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => ratios.set(entry.target, entry.intersectionRatio));
+          let best: Element | null = null;
+          let bestRatio = -1;
+          ratios.forEach((r, el) => {
+            if (r > bestRatio) {
+              bestRatio = r;
+              best = el;
+            }
+          });
+          if (best) setActiveIndex(panels.indexOf(best as HTMLElement));
+        },
+        { root: track, threshold: [0, 0.25, 0.5, 0.75, 1] }
+      );
+      panels.forEach((p) => io.observe(p));
+    } else {
+      setActiveIndex(0);
+    }
+
+    prevBtn?.addEventListener('click', () => {
+      track.scrollBy({ left: -panelStep(), behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+    nextBtn?.addEventListener('click', () => {
+      track.scrollBy({ left: panelStep(), behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+
+    /* Pointer drag-to-scroll. Pointer capture keeps move events flowing even when the
+       cursor leaves the track; the track is itself the overflow-x:auto scroll container.
+       touch-action:pan-y routes horizontal gestures here while leaving vertical page
+       scroll to the browser, so this works for mouse, trackpad-press, and touch. */
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+    let pointerId = -1;
+
+    track.addEventListener('pointerdown', (e: PointerEvent) => {
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startScroll = track.scrollLeft;
+      pointerId = e.pointerId;
+      track.classList.add('is-grabbing');
+      try { track.setPointerCapture(e.pointerId); } catch {}
+      e.preventDefault();
+    });
+    track.addEventListener('pointermove', (e: PointerEvent) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const delta = e.clientX - startX;
+      if (Math.abs(delta) > 3) moved = true;
+      track.scrollLeft = startScroll - delta;
+    });
+    const endDrag = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      track.classList.remove('is-grabbing');
+      try { track.releasePointerCapture(e.pointerId ?? pointerId); } catch {}
+    };
+    track.addEventListener('pointerup', endDrag);
+    track.addEventListener('pointercancel', endDrag);
+    // Prevent click navigation after a drag
+    track.addEventListener(
+      'click',
+      (e) => {
+        if (moved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true
+    );
+  }
+
+  /* ===== Process — connected timeline that draws on scroll ===== */
+  const procSection = document.querySelector<HTMLElement>('[data-process]');
+  if (procSection) {
+    const lineH = procSection.querySelector<HTMLElement>('[data-line-h]');
+    const lineV = procSection.querySelector<HTMLElement>('[data-line-v]');
+    const cometH = procSection.querySelector<HTMLElement>('[data-comet-h]');
+    const cometV = procSection.querySelector<HTMLElement>('[data-comet-v]');
+    const stepEls = Array.from(procSection.querySelectorAll<HTMLElement>('[data-step]'));
+    // thresholds align node activation to the drawn line reaching it
+    const thresholds = [0.001, 0.34, 0.67, 1];
+
+    // desktop + mobile render the same 4 steps, so the list is 8 nodes long;
+    // map each node back to its 0–3 step index via modulo.
+    const perGroup = stepEls.length / 2 || 4;
+
+    const applyProgress = (p: number) => {
+      if (lineH) lineH.style.transform = `scaleX(${p})`;
+      if (lineV) lineV.style.transform = `scaleY(${p})`;
+      // comet rides the leading edge of the drawn portion
+      if (cometH) {
+        cometH.style.left = `${p * 100}%`;
+        cometH.style.opacity = p > 0.001 && p < 0.999 && !reduceMotion ? '1' : '0';
+      }
+      if (cometV) {
+        cometV.style.top = `${p * 100}%`;
+        cometV.style.opacity = p > 0.001 && p < 0.999 && !reduceMotion ? '1' : '0';
+      }
+      stepEls.forEach((el, i) => {
+        const within = Math.floor(i % perGroup);
+        const t = thresholds[within] ?? 1;
+        el.classList.toggle('is-active', p >= t - 0.0005);
+      });
+    };
+
+    if (reduceMotion) {
+      applyProgress(1);
+    } else {
+      ScrollTrigger.create({
+        trigger: procSection,
+        start: 'top 70%',
+        end: 'bottom 70%',
+        scrub: true,
+        onUpdate: (self) => applyProgress(self.progress),
+      });
+    }
+
+    // tap/touch mirrors hover state on mobile (hover handled via CSS on desktop)
+    stepEls.forEach((el) => {
+      el.addEventListener('pointerdown', (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') {
+          stepEls.forEach((s) => s.classList.remove('is-hover'));
+          el.classList.add('is-hover');
+        }
+      });
+    });
+  }
+</script>

@@ -1,0 +1,137 @@
+---
+// Ambient amber "drifting network" background. Fixed behind page content at very low
+// opacity. Single rAF loop, DPR-aware, pauses when tab hidden / off-screen, reduced
+// count + no pointer-reactivity on mobile, static single frame under reduced-motion.
+// pointer-events:none so it never blocks foreground UI (mouse tracked via window).
+---
+
+<div class="dn-bg" aria-hidden="true"><canvas data-dn-canvas></canvas></div>
+
+<style>
+  .dn-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+  .dn-bg canvas { display: block; width: 100%; height: 100%; }
+</style>
+
+<script>
+  const wrap = document.querySelector<HTMLElement>('.dn-bg');
+  const canvas = document.querySelector<HTMLCanvasElement>('canvas[data-dn-canvas]');
+  const ctx = canvas?.getContext('2d');
+
+  if (wrap && canvas && ctx) {
+    const AMBER = '242, 169, 59';
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mqMobile = window.matchMedia('(max-width: 767px)');
+    const interactive = () => window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
+
+    let W = 0, H = 0, raf = 0, running = false;
+    let nodes: { x: number; y: number; vx: number; vy: number }[] = [];
+    const mouse = { x: -9999, y: -9999, active: false };
+    let ripples: { x: number; y: number; t: number }[] = [];
+
+    const linkDist = () => (mqMobile.matches ? 118 : 150);
+
+    function size() {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function build() {
+      const count = mqMobile.matches
+        ? Math.min(34, Math.round((W * H) / 26000))
+        : Math.min(80, Math.round((W * H) / 15000));
+      nodes = Array.from({ length: count }, () => ({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.28,
+        vy: (Math.random() - 0.5) * 0.28,
+      }));
+    }
+
+    function frame() {
+      ctx.clearRect(0, 0, W, H);
+      const link = linkDist();
+      const react = interactive() && !mqMobile.matches;
+      const now = performance.now();
+      ripples = ripples.filter((r) => now - r.t < 600);
+
+      for (const n of nodes) {
+        n.x += n.vx; n.y += n.vy;
+        if (n.x < 0 || n.x > W) n.vx *= -1;
+        if (n.y < 0 || n.y > H) n.vy *= -1;
+        if (react && mouse.active) {
+          const dx = mouse.x - n.x, dy = mouse.y - n.y, d = Math.hypot(dx, dy);
+          if (d < 170 && d > 0.1) { const f = ((170 - d) / 170) * 0.14; n.x += (dx / d) * f; n.y += (dy / d) * f; }
+        }
+        for (const r of ripples) {
+          const dx = n.x - r.x, dy = n.y - r.y, d = Math.hypot(dx, dy) || 0.1;
+          const age = (now - r.t) / 600, radius = age * 240;
+          if (Math.abs(d - radius) < 44) { const push = (1 - age) * 1.6; n.x += (dx / d) * push; n.y += (dy / d) * push; }
+        }
+      }
+
+      // ambient links
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const d = Math.hypot(a.x - b.x, a.y - b.y);
+          if (d < link) {
+            ctx.strokeStyle = `rgba(${AMBER}, ${(1 - d / link) * 0.1})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+          }
+        }
+      }
+
+      // cursor glow + brightened links
+      if (react && mouse.active) {
+        const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 150);
+        g.addColorStop(0, `rgba(${AMBER}, 0.05)`); g.addColorStop(1, `rgba(${AMBER}, 0)`);
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(mouse.x, mouse.y, 150, 0, Math.PI * 2); ctx.fill();
+        for (const n of nodes) {
+          const d = Math.hypot(mouse.x - n.x, mouse.y - n.y);
+          if (d < 170) {
+            ctx.strokeStyle = `rgba(${AMBER}, ${(1 - d / 170) * 0.22})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(mouse.x, mouse.y); ctx.lineTo(n.x, n.y); ctx.stroke();
+          }
+        }
+      }
+
+      // ripple link flash
+      for (const r of ripples) {
+        const age = (now - r.t) / 600, radius = age * 240;
+        ctx.strokeStyle = `rgba(${AMBER}, ${(1 - age) * 0.18})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(r.x, r.y, radius, 0, Math.PI * 2); ctx.stroke();
+      }
+
+      // nodes
+      ctx.fillStyle = `rgba(${AMBER}, 0.45)`;
+      for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, 1.4, 0, Math.PI * 2); ctx.fill(); }
+    }
+
+    function loop() { frame(); raf = requestAnimationFrame(loop); }
+    function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; cancelAnimationFrame(raf); }
+
+    size(); build();
+    if (reduce) {
+      frame(); // single static frame, no loop
+    } else {
+      if (interactive() && !mqMobile.matches) {
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+        window.addEventListener('blur', () => { mouse.active = false; });
+        window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      }
+      let rt = 0;
+      window.addEventListener('resize', () => { clearTimeout(rt); rt = window.setTimeout(() => { size(); build(); }, 200); });
+      document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else start(); });
+      const io = new IntersectionObserver((es) => { es.forEach((e) => (e.isIntersecting ? start() : stop())); });
+      io.observe(wrap);
+      start();
+    }
+  }
+</script>

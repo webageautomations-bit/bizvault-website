@@ -1,0 +1,69 @@
+---
+// Shared hero system for every page. Unifies eyebrow, headline scale, subheadline
+// width, spacing, vertical placement and the amber-accent treatment, while each page
+// supplies its own headline markup (via the `headline` slot) and any unique extra
+// content (home's trade feed via `right`, portfolio's marquee via `below`, services'
+// atmosphere via `bg`). Keeps each page's existing headline animation working — the
+// services mask hooks `[data-hero-headline]`, portfolio's hooks `.hero-word`.
+interface Props {
+  eyebrow: string;
+  eyebrowDot?: boolean;     // home's leading ● marker
+  subhead: string;
+  uppercase?: boolean;      // headline case (preserves each page's voice)
+  tall?: boolean;           // home/portfolio need extra height for feed/marquee
+  reveal?: boolean;         // use the global [data-reveal] fade (blog/contact/home)
+  id?: string;
+}
+const { eyebrow, eyebrowDot = false, subhead, uppercase = false, tall = false, reveal = false, id } = Astro.props;
+const hasRight = Astro.slots.has('right');
+const hasBelow = Astro.slots.has('below');
+const hasCta = Astro.slots.has('cta');
+---
+
+<section
+  id={id}
+  class:list={[
+    'hero relative overflow-hidden flex items-center pt-28 pb-16 lg:pt-36 lg:pb-24',
+    tall ? 'min-h-[90vh]' : 'min-h-[70vh]',
+  ]}
+>
+  <slot name="bg" />
+
+  <div class="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8">
+    <div class:list={['w-full', hasRight && 'grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center']}>
+      <div>
+        <p
+          class="hero-eyebrow text-xs font-semibold tracking-widest uppercase text-bizvault-amber"
+          data-reveal={reveal ? true : undefined}
+        >
+          {eyebrowDot && <span aria-hidden="true">●</span>}{eyebrowDot ? ' ' : ''}{eyebrow}
+        </p>
+        <h1
+          data-hero-headline
+          data-reveal={reveal ? true : undefined}
+          data-reveal-delay={reveal ? '0.05' : undefined}
+          class:list={[
+            'hero-headline font-display font-black tracking-tight leading-[0.95] mt-5 text-[clamp(2.5rem,6vw,4.5rem)]',
+            uppercase && 'uppercase',
+          ]}
+        >
+          <slot name="headline" />
+        </h1>
+        <p
+          class="hero-subhead mt-6 text-bizvault-muted text-base lg:text-lg max-w-xl leading-relaxed"
+          data-reveal={reveal ? true : undefined}
+          data-reveal-delay={reveal ? '0.1' : undefined}
+        >
+          {subhead}
+        </p>
+        {hasCta && (
+          <div class="hero-cta mt-9 flex flex-wrap items-center gap-4">
+            <slot name="cta" />
+          </div>
+        )}
+      </div>
+      <slot name="right" />
+    </div>
+    {hasBelow && <slot name="below" />}
+  </div>
+</section>

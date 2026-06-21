@@ -1,0 +1,248 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Home" description="BizVault FZE — Dubai's structured trade facilitation company. Complex procurement, international logistics, cross-border compliance.">
+
+  <!-- ─── HERO ─────────────────────────────────────────────────────────────── -->
+  <section class="relative min-h-[90vh] flex flex-col justify-center border-b border-zinc-800/60">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-36">
+      <p class="text-xs font-semibold tracking-[0.3em] text-zinc-500 uppercase mb-8">
+        BizVault FZE &mdash; Dubai, UAE
+      </p>
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none uppercase text-white max-w-5xl">
+        Where Large-Scale Trade Gets Done
+      </h1>
+      <p class="mt-10 text-base md:text-lg text-zinc-400 max-w-2xl leading-relaxed">
+        BizVault FZE — Dubai's structured trade facilitation company. Complex procurement, international logistics, cross-border compliance.
+      </p>
+      <div class="mt-12 flex flex-col sm:flex-row gap-4">
+        <a
+          href="/contact"
+          class="inline-flex items-center justify-center px-7 py-3.5 text-xs font-semibold tracking-widest uppercase text-black bg-white hover:bg-zinc-200 transition-colors"
+        >
+          Submit a Trade Inquiry
+        </a>
+        <a
+          href="/portfolio"
+          class="inline-flex items-center justify-center px-7 py-3.5 text-xs font-semibold tracking-widest uppercase text-white border border-zinc-700 hover:border-zinc-400 transition-colors"
+        >
+          View Portfolio
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── STATS STRIP ──────────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 bg-[#0d0d0d]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-zinc-800/60">
+        {[
+          { value: '150+', label: 'Projects Facilitated' },
+          { value: '40+',  label: 'Countries Reached' },
+          { value: '8',    label: 'Trade Verticals' },
+          { value: '15+',  label: 'Years Experience' },
+        ].map((stat) => (
+          <div class="px-8 py-10 text-center">
+            <p class="text-4xl md:text-5xl font-black text-white tracking-tight">{stat.value}</p>
+            <p class="mt-2 text-xs font-medium tracking-widest uppercase text-zinc-500">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TRADE VERTICALS ──────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="mb-16">
+        <p class="text-xs font-semibold tracking-[0.3em] uppercase text-zinc-500 mb-4">What We Trade</p>
+        <h2 class="text-3xl md:text-4xl font-black tracking-tight text-white uppercase">Trade Verticals</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-zinc-800/40">
+        {[
+          {
+            number: '01',
+            title: 'Industrial & Commercial Equipment',
+            desc: 'Heavy machinery, manufacturing equipment, and large-scale commercial systems sourced and delivered across global markets.',
+          },
+          {
+            number: '02',
+            title: 'Mega Infrastructure Movements',
+            desc: 'End-to-end facilitation of infrastructure-scale cargo — from structural steel to prefabricated systems requiring complex logistics coordination.',
+          },
+          {
+            number: '03',
+            title: 'Bottling Plants',
+            desc: 'Complete bottling line procurement and deployment, covering equipment sourcing, transport, compliance, and installation logistics.',
+          },
+          {
+            number: '04',
+            title: 'Water Parks & Utility Projects',
+            desc: 'Large-scale leisure and utility infrastructure projects requiring multi-vendor coordination, specialised freight, and regulatory compliance.',
+          },
+          {
+            number: '05',
+            title: 'Specialised Project Trade',
+            desc: 'Custom-engineered procurement solutions for one-of-a-kind projects where standard trade channels fall short.',
+          },
+        ].map((v) => (
+          <div class="bg-[#0a0a0a] p-8 lg:p-10 flex flex-col gap-6">
+            <span class="text-xs font-semibold tracking-[0.2em] text-zinc-700">{v.number}</span>
+            <h3 class="text-base font-bold text-white leading-snug">{v.title}</h3>
+            <p class="text-sm text-zinc-500 leading-relaxed">{v.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW BIZVAULT EXECUTES ────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 py-24 lg:py-32 bg-[#0d0d0d]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="mb-16">
+        <p class="text-xs font-semibold tracking-[0.3em] uppercase text-zinc-500 mb-4">Process</p>
+        <h2 class="text-3xl md:text-4xl font-black tracking-tight text-white uppercase">How BizVault Executes</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-zinc-800/40">
+        {[
+          {
+            title: 'Complexity Handled',
+            items: ['Multi-country procurement', 'Parallel supplier streams', 'Regulatory compliance'],
+            desc: "We engage where complexity is highest — managing multiple jurisdictions, supplier streams, and compliance obligations simultaneously so you don't have to.",
+          },
+          {
+            title: 'Logistics Controlled',
+            items: ['Freight coordination', 'Customs clearance', 'Last-mile delivery'],
+            desc: 'From origin to destination, we maintain full visibility and control over freight movement, documentation, and final delivery.',
+          },
+          {
+            title: 'Commitments Delivered',
+            items: ['Structured processes', 'Documented obligations', 'Consistent follow-through'],
+            desc: 'Every engagement is built on formal processes and clear accountability. Commitments are documented, tracked, and fulfilled.',
+          },
+        ].map((block) => (
+          <div class="bg-[#0d0d0d] p-8 lg:p-12 flex flex-col gap-8">
+            <h3 class="text-xl font-black text-white uppercase tracking-tight">{block.title}</h3>
+            <ul class="flex flex-col gap-3">
+              {block.items.map((item) => (
+                <li class="flex items-center gap-3">
+                  <span class="w-1 h-1 rounded-full bg-zinc-600 shrink-0"></span>
+                  <span class="text-sm text-zinc-400 font-medium">{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p class="text-sm text-zinc-600 leading-relaxed border-t border-zinc-800 pt-6">{block.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CLOSING STATEMENT ────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <blockquote class="max-w-4xl">
+        <p class="text-xl md:text-2xl lg:text-3xl font-light text-zinc-300 leading-relaxed italic">
+          "Every BizVault engagement follows the same principle: structure before speed, compliance before convenience, delivery above all else."
+        </p>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ─── GLOBAL REACH ─────────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 py-24 lg:py-32 bg-[#0d0d0d]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+        <div>
+          <p class="text-xs font-semibold tracking-[0.3em] uppercase text-zinc-500 mb-4">Reach</p>
+          <h2 class="text-3xl md:text-4xl font-black tracking-tight text-white uppercase leading-tight">
+            Dubai.<br />Connected to the World.
+          </h2>
+          <p class="mt-6 text-sm text-zinc-500 leading-relaxed max-w-md">
+            Operating from the UAE's premier free zone, BizVault connects buyers and suppliers across the globe's most active trade corridors.
+          </p>
+        </div>
+        <div class="flex flex-col gap-px bg-zinc-800/40">
+          {[
+            { from: 'Dubai', to: 'Europe' },
+            { from: 'Dubai', to: 'Pakistan' },
+            { from: 'Dubai', to: 'Far East' },
+            { from: 'Dubai', to: 'United Kingdom' },
+            { from: 'Dubai', to: 'South Asia' },
+          ].map((corridor) => (
+            <div class="bg-[#0d0d0d] px-8 py-5 flex items-center justify-between group hover:bg-zinc-900/30 transition-colors">
+              <span class="text-sm font-semibold text-white tracking-wide">{corridor.from}</span>
+              <span class="text-zinc-700 text-base font-light group-hover:text-zinc-400 transition-colors">&#8594;</span>
+              <span class="text-sm font-medium text-zinc-400 tracking-wide">{corridor.to}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ ──────────────────────────────────────────────────────────────── -->
+  <section class="border-b border-zinc-800/60 py-24 lg:py-32">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="mb-16">
+        <p class="text-xs font-semibold tracking-[0.3em] uppercase text-zinc-500 mb-4">FAQ</p>
+        <h2 class="text-3xl md:text-4xl font-black tracking-tight text-white uppercase">Common Questions</h2>
+      </div>
+      <div class="max-w-3xl flex flex-col divide-y divide-zinc-800/60">
+        {[
+          {
+            q: 'What does BizVault specialise in?',
+            a: 'BizVault specialises in large-scale, complex trade facilitation — specifically engagements where procurement spans multiple countries, logistics are non-standard, or compliance requirements are significant. We handle what standard trading channels cannot.',
+          },
+          {
+            q: 'Which industries does BizVault serve?',
+            a: 'We operate across industrial equipment, mega infrastructure, bottling and manufacturing plants, water parks and utility developments, and bespoke project trade. Our experience spans eight distinct trade verticals.',
+          },
+          {
+            q: 'Does BizVault execute directly or act as an intermediary?',
+            a: 'BizVault acts as a structured trade facilitator — we own the process, manage supplier relationships, coordinate logistics, and ensure compliance on your behalf. The result is direct-execution accountability with the breadth of an experienced network.',
+          },
+          {
+            q: 'What regions does BizVault operate in?',
+            a: 'Our primary hub is Dubai, UAE, with active trade corridors into Europe, Pakistan, the Far East, the United Kingdom, and South Asia. We have facilitated projects across 40+ countries globally.',
+          },
+          {
+            q: 'How do I begin an engagement with BizVault?',
+            a: 'Submit a Trade Inquiry through our contact page or reach us directly via WhatsApp. Our team will review your requirements, assess feasibility, and respond with a structured proposal.',
+          },
+        ].map((faq) => (
+          <details class="py-6 group cursor-pointer">
+            <summary class="flex items-start justify-between gap-6 list-none">
+              <span class="text-base font-semibold text-white">{faq.q}</span>
+              <span class="shrink-0 mt-0.5 text-zinc-500 group-open:text-white transition-colors text-xl font-light leading-none select-none">
+                <span class="faq-plus">+</span>
+                <span class="faq-minus">&times;</span>
+              </span>
+            </summary>
+            <p class="mt-4 text-sm text-zinc-500 leading-relaxed pr-10">{faq.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BOTTOM CTA ───────────────────────────────────────────────────────── -->
+  <section class="py-24 lg:py-32 bg-[#0d0d0d]">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-5xl font-black tracking-tight text-white uppercase leading-tight mb-8">
+        Ready to Move?
+      </h2>
+      <p class="text-sm text-zinc-500 mb-10 max-w-xl mx-auto leading-relaxed">
+        If your trade requirement is too large, too complex, or too critical to leave to chance — BizVault is the call to make.
+      </p>
+      <a
+        href="/contact"
+        class="inline-flex items-center px-8 py-4 text-xs font-semibold tracking-widest uppercase text-black bg-white hover:bg-zinc-200 transition-colors"
+      >
+        Submit a Trade Inquiry
+      </a>
+    </div>
+  </section>
+
+</Layout>

@@ -1,11 +1,1006 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import DriftingNetwork from '../components/DriftingNetwork.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// SSR fallback rows for the live feed (no-JS); JS takes over on load.
+const feedEntries = [
+  { time: 'just now', route: 'Dubai ↔ South Asia', desc: 'Industrial equipment sourcing', category: 'Equipment' },
+  { time: '42s ago', route: 'Dubai ↔ Far East', desc: 'Mega project procurement support', category: 'Infrastructure' },
+  { time: '1m ago', route: 'Dubai ↔ UK', desc: 'Fabric & textile trade corridor', category: 'Textiles' },
+  { time: '2m ago', route: 'Dubai ↔ East Africa', desc: 'Utility infrastructure machinery', category: 'Infrastructure' },
+  { time: '2m ago', route: 'Dubai ↔ Pakistan', desc: 'Textile sourcing & export coordination', category: 'Textiles' },
+  { time: '3m ago', route: 'Dubai ↔ Europe', desc: 'Equipment freight & customs clearance', category: 'Equipment' },
+  { time: '4m ago', route: 'Dubai ↔ MENA', desc: 'Multi-country supplier sourcing', category: 'Sourcing' },
+  { time: '5m ago', route: 'Dubai ↔ South Asia', desc: 'Bottling plant equipment supply', category: 'Infrastructure' },
+];
+
+const categoryPill: Record<string, string> = {
+  Equipment: 'bg-bizvault-amber/10 text-bizvault-amber',
+  Infrastructure: 'bg-sky-400/10 text-sky-300',
+  Textiles: 'bg-bizvault-amber-deep/15 text-bizvault-amber-deep',
+  Sourcing: 'bg-teal-400/10 text-teal-300',
+};
+
+const filterTabs = ['All', 'Equipment', 'Infrastructure', 'Textiles', 'Sourcing'];
+
+const stats = [
+  { value: 'Dubai', label: 'Headquarters — UAE', count: null },
+  { value: '5', label: 'Trade Verticals — Sectors', count: 5 },
+  { value: '6', label: 'Group Companies — Operating', count: 6 },
+  { value: 'Global', label: 'Trade Reach — Corridors', count: null },
+];
+
+// Trade lifecycle pipeline (End-to-End section)
+const lifecycle = [
+  { label: 'Sourcing', detail: 'Supplier identification & vetting', icon: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>' },
+  { label: 'Procurement', detail: 'Purchase structuring & contracts', icon: '<path d="M21 8l-9-4.5L3 8l9 4.5 9-4.5z"/><path d="M3 8v8l9 4.5 9-4.5V8"/><path d="M12 12.5V21"/>' },
+  { label: 'Logistics', detail: 'Freight, carriers & shipment', icon: '<rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/>' },
+  { label: 'Compliance', detail: 'Customs & documentation', icon: '<path d="M12 3l8 4v5c0 5-3.4 8.2-8 9-4.6-.8-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/>' },
+  { label: 'Delivery', detail: 'Last-mile to project site', icon: '<path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="2.5"/>' },
+];
+
+const verticals = [
+  { num: '01', title: 'Industrial & Commercial Equipment', desc: 'Sourcing, procurement, and delivery of heavy industrial and commercial machinery across international markets.' },
+  { num: '02', title: 'Mega Infrastructure Movements', desc: 'End-to-end facilitation of large-scale infrastructure trade — civil, mechanical, and utility project supply chains.' },
+  { num: '03', title: 'Bottling Plants', desc: 'Turnkey supply and coordination of bottling plant equipment — sourcing, documentation, and installation support.' },
+  { num: '04', title: 'Water Parks & Utility Projects', desc: 'Specialised procurement and trade support for water park infrastructure and large-scale utility development projects.' },
+  { num: '05', title: 'Specialised Project Trade', desc: 'Bespoke trade facilitation for complex, multi-country sourcing requirements across industrial and commercial sectors.' },
+];
+
+const verticalIcons: Record<string, string> = {
+  '01': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  '02': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9h.01M9 12h.01M9 15h.01M9 18h.01"/></svg>',
+  '03': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M9 3h6"/><path d="M10 3v6l-5.5 9.5A2 2 0 0 0 6.2 21h11.6a2 2 0 0 0 1.7-2.5L14 9V3"/><path d="M7 15h10"/></svg>',
+  '04': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><path d="M12 2.6s6.5 6.9 6.5 11.4a6.5 6.5 0 0 1-13 0C5.5 9.5 12 2.6 12 2.6z"/></svg>',
+  '05': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-7 h-7"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+};
+
+const execution = [
+  { num: '01', title: 'Complexity Handled', desc: 'Multi-country procurement, parallel supplier streams, regulatory compliance — managed as a single coordinated operation.', tags: ['Multi-Country', 'Compliance', 'Procurement'] },
+  { num: '02', title: 'Logistics Controlled', desc: 'From port to project site — freight coordination, customs clearance, and last-mile delivery managed end-to-end.', tags: ['Freight', 'Customs', 'Last-Mile'] },
+  { num: '03', title: 'Commitments Delivered', desc: 'Every engagement built on structured processes, documented obligations, and consistent follow-through — without exception.', tags: ['Accountability', 'Structure', 'Delivery'] },
+];
+
+// Pulse/line colour per category for the radial map
+const corridorColor: Record<string, string> = {
+  Equipment: '#F2A93B',
+  Textiles: '#C9821F',
+  Sourcing: '#2dd4bf',
+  Infrastructure: '#38bdf8',
+};
+
+// Region nodes positioned on a 400×400 viewBox (hub at 200,200)
+const corridors = [
+  { region: 'Europe', category: 'Equipment', slug: 'europe', x: 312, y: 96 },
+  { region: 'Pakistan', category: 'Textiles', slug: 'pakistan', x: 206, y: 356 },
+  { region: 'Far East', category: 'Sourcing', slug: 'far-east', x: 356, y: 206 },
+  { region: 'UK', category: 'Textiles', slug: 'uk', x: 92, y: 92 },
+  { region: 'South Asia', category: 'Equipment', slug: 'south-asia', x: 316, y: 312 },
+  { region: 'East Africa', category: 'Infrastructure', slug: 'east-africa', x: 60, y: 268 },
+];
+
+const faqs = [
+  { num: '01', q: 'What does BizVault specialise in?', a: 'BizVault is a Dubai-based trading company managing complex import, export, and large-scale project movements across international markets. We operate across industrial, infrastructure, and specialised commercial trade verticals.' },
+  { num: '02', q: 'Which industries does BizVault operate in?', a: 'We work across multiple sectors including industrial and commercial equipment, infrastructure supply chains, bottling plant systems, water park and utility developments, and specialised multi-country project trade.' },
+  { num: '03', q: 'Does BizVault execute projects directly?', a: 'BizVault facilitates and manages trade execution, procurement coordination, logistics oversight, and cross-border compliance. Our role ensures structured movement, documentation accuracy, and controlled delivery across regions.' },
+  { num: '04', q: 'What regions does BizVault trade with?', a: 'Headquartered in Dubai, BizVault operates across international trade corridors, coordinating sourcing and supply across Asia, the Middle East, Europe, and other global markets as required by project scope.' },
+  { num: '05', q: 'How can strategic partners or clients engage with BizVault?', a: 'Engagement begins through a formal trade enquiry. Our team reviews project scope, sourcing requirements, and regional considerations before structuring a tailored execution approach.' },
+];
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Home" description="BizVault FZE — Dubai-based international trading and project facilitation. Procurement, logistics, and cross-border compliance for industrial and infrastructure projects worldwide.">
+
+  <DriftingNetwork />
+
+  <!-- ============ HERO ============ -->
+  <Hero
+    eyebrow="Headquartered in Dubai, UAE"
+    eyebrowDot={true}
+    uppercase={true}
+    tall={true}
+    subhead="BizVault FZE is a Dubai-based international trading and project facilitation company — managing procurement, logistics, and compliance for industrial and infrastructure projects across global markets."
+  >
+    <Fragment slot="headline">
+      <span class="block">Where</span>
+      <span class="block text-bizvault-amber">Large-Scale</span>
+      <span class="block">Trade Gets Done.</span>
+    </Fragment>
+
+    <Fragment slot="cta">
+      <a
+        href="/contact"
+        class="bg-bizvault-amber text-bizvault-bg px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase hover:bg-amber-400 transition"
+      >
+        Submit a Trade Inquiry
+      </a>
+      <a
+        href="#feed"
+        class="border border-bizvault-border text-bizvault-text px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase hover:border-bizvault-amber transition"
+      >
+        Scroll to Explore
+      </a>
+    </Fragment>
+
+    <!-- Right: Trade Feed -->
+    <div id="feed" slot="right" class="relative bg-bizvault-surface border border-bizvault-border rounded-lg overflow-hidden">
+
+        <!-- Scanline shimmer (decorative, radar-style refresh) -->
+        <div class="feed-scanline" aria-hidden="true"></div>
+
+        <!-- Header row -->
+        <div class="p-4 border-b border-bizvault-border flex justify-between items-center">
+          <span class="text-sm font-medium">BizVault Trade Feed</span>
+          <span class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-bizvault-amber animate-pulse"></span>
+            <span class="text-bizvault-muted text-xs uppercase tracking-widest">Live</span>
+          </span>
+        </div>
+
+        <!-- Live metrics -->
+        <div class="px-4 py-2.5 border-b border-bizvault-border flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+          <span class="flex items-center gap-1.5 text-bizvault-muted">
+            <span class="w-1.5 h-1.5 rounded-full bg-bizvault-amber animate-pulse"></span>
+            <span id="feed-count" class="text-bizvault-text font-medium tabular-nums">1,247</span> active movements
+          </span>
+          <span class="text-bizvault-muted">6 corridors online</span>
+          <span class="text-bizvault-muted ml-auto">updated <span id="feed-updated" class="text-bizvault-text">just now</span></span>
+        </div>
+
+        <!-- Filter tabs -->
+        <div class="flex gap-5 px-4 py-3 border-b border-bizvault-border overflow-x-auto">
+          {filterTabs.map((tab) => (
+            <button
+              type="button"
+              data-filter={tab}
+              class={`feed-tab whitespace-nowrap text-xs font-medium tracking-widest uppercase py-2.5 lg:py-1 lg:pb-1 border-b-2 transition ${
+                tab === 'All'
+                  ? 'text-white border-bizvault-amber'
+                  : 'text-bizvault-muted border-transparent'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        <!-- Fixed-height scrollable list -->
+        <div class="h-[420px] overflow-y-auto divide-y divide-bizvault-border" id="feed-list">
+          {feedEntries.map((entry) => (
+            <div class="feed-row flex items-center gap-3 p-4" data-category={entry.category}>
+              <span class="feed-time text-bizvault-muted text-xs tabular-nums shrink-0 w-16">{entry.time}</span>
+              <div class="feed-reveal min-w-0 flex-1">
+                <p class="text-sm font-medium truncate">{entry.route}</p>
+                <p class="text-bizvault-muted text-xs mt-0.5">{entry.desc}</p>
+              </div>
+              <span class={`feed-pill shrink-0 text-[10px] uppercase tracking-widest px-2 py-1 rounded ${categoryPill[entry.category]}`}>
+                {entry.category}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <!-- Fine print (pinned below the fixed list) -->
+        <div class="p-4 text-bizvault-muted text-xs border-t border-bizvault-border">
+          Trade entries shown are illustrative. Routes and verticals reflect BizVault's actual operational scope.
+        </div>
+
+      </div>
+  </Hero>
+
+  <!-- ============ STATS STRIP ============ -->
+  <section id="stats-strip" class="border-y border-bizvault-border">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 md:divide-x divide-bizvault-amber/15">
+        {stats.map((stat) => (
+          <div class="stat-cell group relative py-10 px-4 md:px-8 text-center md:text-left transition-all duration-300 hover:bg-[#15151a] hover:shadow-[0_0_40px_-12px_rgba(242,169,59,0.30)]">
+            <span class="block h-0.5 w-8 rounded-full bg-bizvault-amber/80 mb-4 mx-auto md:mx-0 transition-all duration-300 group-hover:w-12 group-hover:bg-bizvault-amber"></span>
+            <p class="font-display text-3xl lg:text-4xl leading-none">
+              {stat.count != null
+                ? <span class="stat-num text-bizvault-amber">{stat.count}</span>
+                : <span class="stat-text inline-block text-white border-b-2 border-bizvault-amber/50 pb-1 transition-colors duration-300 group-hover:border-bizvault-amber">{stat.value}</span>}
+            </p>
+            <p class="text-xs tracking-widest uppercase text-bizvault-muted mt-3">{stat.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ END-TO-END ============ -->
+  <section id="end-to-end" class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+    <div class="grid lg:grid-cols-5 gap-12 lg:gap-16">
+      <!-- Left sticky headline + drawing accent line -->
+      <div class="lg:col-span-2">
+        <div class="lg:sticky lg:top-28">
+          <h2 class="font-display font-black tracking-tight text-4xl lg:text-5xl leading-[1.05]">
+            End-to-End Trade &amp; Project Execution<span class="text-bizvault-amber">.</span>
+          </h2>
+          <div class="mt-8 h-32 w-px bg-bizvault-border relative overflow-hidden">
+            <span data-e2e-line class="absolute inset-0 origin-top scale-y-0 bg-gradient-to-b from-bizvault-amber to-bizvault-amber/0"></span>
+          </div>
+        </div>
+      </div>
+      <!-- Right paragraphs -->
+      <div class="lg:col-span-3 space-y-8">
+        <p class="text-bizvault-text/80 text-lg leading-relaxed">
+          BizVault FZE manages the full <span class="ul-draw">lifecycle of international trade</span> — from supplier sourcing and procurement through to logistics, compliance, and final delivery. We operate across industrial, infrastructure, and commercial sectors, facilitating large-scale movements that require structure, reliability, and execution discipline.
+        </p>
+        <p class="text-bizvault-text/80 text-lg leading-relaxed">
+          Where others stop at supply, <span class="ul-draw">BizVault goes further</span> — coordinating across borders, jurisdictions, and project timelines to ensure every engagement lands as committed.
+        </p>
+      </div>
+    </div>
+
+    <!-- Lifecycle: scroll-driven traveling-shipment pipeline -->
+    <div id="lifecycle" class="mt-20 lg:mt-28">
+      <p data-reveal class="text-xs tracking-widest uppercase text-bizvault-muted mb-10">The Trade Lifecycle</p>
+
+      <!-- Desktop horizontal track -->
+      <div class="lc-track relative hidden md:block h-[150px]">
+        <!-- base + fill lines (span node 1 → node 5 centres, 10%→90%) -->
+        <div class="absolute left-[10%] right-[10%] top-6 h-0.5 -translate-y-1/2 bg-bizvault-border z-0"></div>
+        <div data-lc-fill class="absolute left-[10%] top-6 h-0.5 w-[80%] -translate-y-1/2 origin-left scale-x-0 bg-bizvault-amber z-0"></div>
+
+        <!-- traveling shipment -->
+        <div data-lc-ship class="lc-ship absolute top-6 left-[10%] -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+          <span class="lc-ship-inner relative flex h-7 w-9 items-center justify-center rounded-md bg-bizvault-amber text-bizvault-bg shadow-[0_0_16px_rgba(242,169,59,0.7)]">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>
+          </span>
+        </div>
+
+        {lifecycle.map((s, i) => (
+          <div class="lc-node group absolute top-0 -translate-x-1/2 z-10 flex flex-col items-center text-center cursor-pointer" style={`left:${10 + i * 20}%`} data-lc-node data-index={i}>
+            <span class="lc-dot relative flex h-12 w-12 items-center justify-center rounded-full border border-bizvault-border bg-bizvault-bg text-bizvault-muted transition-all duration-300">
+              <span class="lc-glow pointer-events-none absolute -inset-1 rounded-full bg-bizvault-amber/30 blur-md opacity-0 transition-opacity duration-300"></span>
+              <svg class="relative w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={s.icon}></svg>
+            </span>
+            <span class="lc-label mt-4 font-display text-sm text-bizvault-muted transition-colors duration-300">{s.label}</span>
+            <span class="lc-detail mt-1 text-xs text-bizvault-muted opacity-0 translate-y-1 transition-all duration-300 max-w-[10rem]">{s.detail}</span>
+          </div>
+        ))}
+      </div>
+
+      <!-- Mobile vertical track -->
+      <div class="lc-track-v relative md:hidden">
+        <div class="absolute left-6 top-6 bottom-6 w-0.5 -translate-x-1/2 bg-bizvault-border z-0"></div>
+        <div data-lc-fill-v class="absolute left-6 top-6 w-0.5 -translate-x-1/2 origin-top scale-y-0 bg-bizvault-amber z-0" style="height:calc(100% - 3rem)"></div>
+        <div data-lc-ship-v class="lc-ship absolute left-6 top-6 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none">
+          <span class="lc-ship-inner relative flex h-7 w-9 items-center justify-center rounded-md bg-bizvault-amber text-bizvault-bg shadow-[0_0_16px_rgba(242,169,59,0.7)]">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg>
+          </span>
+        </div>
+        <div class="flex flex-col gap-9">
+          {lifecycle.map((s, i) => (
+            <div class="lc-node group relative flex items-center gap-4 cursor-pointer z-10" data-lc-node data-index={i}>
+              <span class="lc-dot relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-bizvault-border bg-bizvault-bg text-bizvault-muted transition-all duration-300">
+                <span class="lc-glow pointer-events-none absolute -inset-1 rounded-full bg-bizvault-amber/30 blur-md opacity-0 transition-opacity duration-300"></span>
+                <svg class="relative w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={s.icon}></svg>
+              </span>
+              <div>
+                <span class="lc-label block font-display text-sm text-bizvault-muted transition-colors duration-300">{s.label}</span>
+                <span class="lc-detail block text-xs text-bizvault-muted opacity-0 -translate-y-1 transition-all duration-300">{s.detail}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRADE VERTICALS ============ -->
+  <section id="verticals" class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+    <p class="text-xs tracking-widest uppercase text-bizvault-amber">Trade Verticals</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 items-stretch">
+      {verticals.map((v) => (
+        <div class="vert-card group relative flex flex-col h-full overflow-hidden bg-bizvault-surface border border-bizvault-border rounded-lg p-6 lg:p-8 transition-all duration-[250ms] ease-out hover:-translate-y-1 hover:border-bizvault-amber">
+          <span class="pointer-events-none absolute -top-16 -right-16 w-32 h-32 rounded-full bg-bizvault-amber/0 blur-2xl transition-colors duration-300 group-hover:bg-bizvault-amber/20"></span>
+          <div class="relative flex items-center justify-between">
+            <span class="text-bizvault-amber transition-colors duration-300 group-hover:text-amber-300" set:html={verticalIcons[v.num]} />
+            <span class="font-display text-bizvault-amber text-sm">{v.num}</span>
+          </div>
+          <h3 class="relative font-display font-bold text-lg text-white mt-4">{v.title}</h3>
+          <p class="relative text-bizvault-muted text-sm leading-relaxed mt-3">{v.desc}</p>
+        </div>
+      ))}
+
+      <!-- CTA card completes the 3×2 grid -->
+      <a
+        href="/services"
+        class="vert-card group relative flex flex-col justify-center h-full overflow-hidden rounded-lg p-6 lg:p-8 bg-bizvault-amber/10 border border-bizvault-amber/40 transition-all duration-[250ms] ease-out hover:-translate-y-1 hover:border-bizvault-amber hover:bg-bizvault-amber/[0.16]"
+      >
+        <span class="font-display font-bold text-xl lg:text-2xl text-white leading-tight">Explore Full<br />Capabilities</span>
+        <span class="mt-4 inline-flex items-center gap-2 text-bizvault-amber text-xs font-semibold tracking-widest uppercase">
+          View Services
+          <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ HOW BIZVAULT EXECUTES ============ -->
+  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32 overflow-hidden">
+    <p data-reveal class="text-xs tracking-widest uppercase text-bizvault-amber">How BizVault Executes</p>
+    <div class="mt-14 space-y-16 lg:space-y-24">
+      {execution.map((e, i) => (
+        <div class={`exec-row group relative max-w-3xl ${i % 2 === 1 ? 'lg:ml-auto' : 'mr-auto'}`}>
+          <span class="exec-ghost pointer-events-none absolute -top-10 -left-2 lg:-left-6 font-display font-black leading-none text-[7rem] lg:text-[12rem] text-white/[0.05] transition-colors duration-300 select-none">{e.num}</span>
+          <div class="relative pl-6">
+            <span class="exec-line absolute left-0 top-1 h-[calc(100%-0.5rem)] w-0.5 origin-top scale-y-0 bg-bizvault-amber"></span>
+            <h3 data-exec-item class="font-display font-bold text-2xl lg:text-4xl text-white">{e.title}</h3>
+            <p data-exec-item class="mt-4 text-bizvault-muted leading-relaxed max-w-xl">{e.desc}</p>
+            <div data-exec-item class="flex flex-wrap gap-2 mt-6">
+              {e.tags.map((tag) => (
+                <span class="text-[10px] uppercase tracking-widest px-3 py-1 rounded-full border border-bizvault-border text-bizvault-muted transition-colors duration-200 hover:border-bizvault-amber hover:text-bizvault-amber">{tag}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    <p data-exec-close class="font-display text-2xl lg:text-3xl text-center mt-20 lg:mt-28 max-w-3xl mx-auto text-bizvault-muted">
+      <span class="text-white">Structure</span> before speed, <span class="text-white">compliance</span> before convenience, <span class="text-bizvault-amber">delivery</span> above all else.
+    </p>
+  </section>
+
+  <!-- ============ GLOBAL REACH ============ -->
+  <section class="bg-bizvault-surface">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+        <!-- Left: copy + corridor list -->
+        <div>
+          <p data-reveal class="text-xs tracking-widest uppercase text-bizvault-amber">Global Reach</p>
+          <h2 data-reveal data-reveal-delay="0.06" class="font-display text-3xl lg:text-5xl mt-4">
+            <span class="text-white">Dubai.</span> <span class="text-bizvault-amber">Connected to the World.</span>
+          </h2>
+          <p data-reveal data-reveal-delay="0.12" class="text-bizvault-muted max-w-xl mt-6 leading-relaxed">
+            Operating from our UAE base, BizVault facilitates active trade across six international corridors — managing procurement, logistics, and compliance for every movement.
+          </p>
+
+          <div class="mt-10 divide-y divide-bizvault-border border-y border-bizvault-border">
+            {corridors.map((c, i) => (
+              <div
+                data-corridor={c.slug}
+                data-reveal
+                data-reveal-delay={(i * 0.06).toFixed(2)}
+                class="reach-row flex items-center justify-between py-3.5 px-2 -mx-2 rounded cursor-default transition-colors duration-200 hover:bg-bizvault-amber/[0.05]"
+              >
+                <span class="text-sm font-medium flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full" style={`background:${corridorColor[c.category]}`}></span>
+                  Dubai → {c.region}
+                </span>
+                <span class={`shrink-0 text-[10px] uppercase tracking-widest px-2 py-1 rounded ${categoryPill[c.category]}`}>{c.category}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Right: radial corridor map -->
+        <div class="relative">
+          <svg id="reach-map" viewBox="0 0 400 400" class="w-full max-w-[460px] mx-auto overflow-visible">
+            <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.05)" />
+            <circle cx="200" cy="200" r="92" fill="none" stroke="rgba(255,255,255,0.05)" />
+
+            {corridors.map((c) => (
+              <line id={`line-${c.slug}`} class="reach-line" x1="200" y1="200" x2={c.x} y2={c.y} stroke="rgba(242,169,59,0.22)" stroke-width="1.2" data-color={corridorColor[c.category]} />
+            ))}
+
+            <g id="reach-pulses"></g>
+
+            {corridors.map((c) => (
+              <g class="reach-node cursor-pointer" data-corridor={c.slug}>
+                {/* Inner mark holds ONLY the circles, so scale/hover pivots on the
+                    exact node centre (c.x,c.y) — the line endpoint stays anchored. */}
+                <g id={`node-${c.slug}`} class="reach-node-mark" style="transform-box:fill-box; transform-origin:center;">
+                  <circle cx={c.x} cy={c.y} r="6.5" fill="#0F0F12" stroke="rgba(242,169,59,0.65)" stroke-width="1.3" class="reach-node-ring" />
+                  <circle cx={c.x} cy={c.y} r="2.4" fill="#F2A93B" />
+                </g>
+                <text x={c.x} y={c.y - 12} text-anchor="middle" fill="#9A9AA2" font-size="9.5" style="font-family:Inter,sans-serif">{c.region}</text>
+              </g>
+            ))}
+
+            <circle id="hub-glow" cx="200" cy="200" r="15" fill="rgba(242,169,59,0.22)" style="transform-box:fill-box; transform-origin:center;" />
+            <circle cx="200" cy="200" r="9" fill="#F2A93B" />
+            <circle cx="200" cy="200" r="9" fill="none" stroke="rgba(242,169,59,0.5)" stroke-width="1" />
+            <text x="200" y="226" text-anchor="middle" fill="#FAFAFA" font-size="8.5" letter-spacing="1.5" style="font-family:Archivo,sans-serif;font-weight:700">DUBAI / UAE HQ</text>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32">
+    <div class="grid lg:grid-cols-5 gap-12 lg:gap-16">
+      <!-- Left sticky -->
+      <div class="lg:col-span-2">
+        <div class="lg:sticky lg:top-28">
+          <p class="text-xs tracking-widest uppercase text-bizvault-amber">FAQ</p>
+          <h2 class="font-display font-black tracking-tight text-3xl lg:text-5xl mt-4">Frequently Asked Questions<span class="text-bizvault-amber">.</span></h2>
+          <p class="text-bizvault-muted mt-5 max-w-xs leading-relaxed">Answers to the questions partners and clients ask most about working with BizVault.</p>
+          <a href="/contact" class="inline-flex items-center gap-2 mt-6 text-bizvault-amber text-xs font-semibold tracking-widest uppercase hover:gap-3 transition-all">
+            Submit a Trade Inquiry
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right accordion -->
+      <div class="lg:col-span-3">
+        {faqs.map((item, i) => (
+          <div data-reveal data-reveal-delay={(i * 0.06).toFixed(2)} class={`faq-item relative border-b border-bizvault-border ${i === 0 ? 'is-open' : ''}`}>
+            <span class="faq-sweep absolute -bottom-px left-0 h-px w-0 bg-bizvault-amber transition-all duration-300"></span>
+            <button type="button" class="faq-q w-full text-left cursor-pointer py-5 flex justify-between items-center gap-4">
+              <span class="flex items-baseline gap-4">
+                <span class="faq-num font-display text-bizvault-amber text-sm transition-colors duration-200">{item.num}</span>
+                <span class="faq-q-text font-display font-bold text-base lg:text-lg transition-transform duration-200">{item.q}</span>
+              </span>
+              <span class="faq-icon relative w-4 h-4 shrink-0 text-bizvault-amber">
+                <span class="absolute inset-x-0 top-1/2 h-0.5 -translate-y-1/2 bg-current rounded"></span>
+                <span class="faq-icon-v absolute inset-y-0 left-1/2 w-0.5 bg-current rounded"></span>
+              </span>
+            </button>
+            <div class="faq-a overflow-hidden" style="max-height:0">
+              <p class="text-bizvault-muted text-sm leading-relaxed pb-5 pl-8 max-w-2xl">{item.a}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BOTTOM CTA ============ -->
+  <section class="max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32 text-center">
+    <h2 data-reveal class="font-display text-3xl lg:text-5xl">Ready to move large-scale trade?</h2>
+    <div data-reveal data-reveal-delay="0.08" class="mt-8">
+      <a
+        href="/contact"
+        class="inline-block bg-bizvault-amber text-bizvault-bg px-6 py-3 rounded-md text-xs font-semibold tracking-widest uppercase hover:bg-amber-400 transition"
+      >
+        Submit a Trade Inquiry
+      </a>
+    </div>
+  </section>
+
 </Layout>
+
+<style is:global>
+  /* Thin amber scrollbar for the live trade feed */
+  #feed-list { scrollbar-width: thin; scrollbar-color: rgba(242, 169, 59, 0.4) transparent; }
+  #feed-list::-webkit-scrollbar { width: 6px; }
+  #feed-list::-webkit-scrollbar-track { background: transparent; }
+  #feed-list::-webkit-scrollbar-thumb { background: rgba(242, 169, 59, 0.35); border-radius: 9999px; }
+  #feed-list::-webkit-scrollbar-thumb:hover { background: rgba(242, 169, 59, 0.6); }
+
+  /* Streaming insertion: slide down from above + amber flash + text clip reveal */
+  @keyframes feedSlideIn { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes feedFlash { 0% { background-color: rgba(242, 169, 59, 0.22); } 100% { background-color: transparent; } }
+  @keyframes feedClip { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  #feed .feed-row--enter { animation: feedSlideIn 0.45s ease both, feedFlash 1.2s ease both; }
+  #feed .feed-row--enter .feed-reveal { animation: feedClip 0.4s ease both; }
+
+  /* Scanline shimmer (radar-style refresh sweep) */
+  #feed .feed-scanline { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 20; }
+  #feed .feed-scanline::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0; height: 32%;
+    background: linear-gradient(to bottom, transparent, rgba(242, 169, 59, 0.10), transparent);
+    transform: translateY(-110%); animation: feedScan 8s ease-in-out infinite;
+  }
+  @keyframes feedScan {
+    0% { transform: translateY(-110%); opacity: 0; }
+    5% { opacity: 0.9; }
+    16% { transform: translateY(330%); opacity: 0; }
+    100% { transform: translateY(330%); opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #feed .feed-scanline::before { animation: none; display: none; }
+    #feed .feed-row--enter,
+    #feed .feed-row--enter .feed-reveal { animation: none; }
+  }
+</style>
+
+<style>
+  /* ---- End-to-End animated underlines ---- */
+  .ul-draw {
+    color: #fff; font-weight: 600;
+    background-image: linear-gradient(#f2a93b, #f2a93b);
+    background-repeat: no-repeat; background-position: 0 100%;
+    background-size: 0% 2px; transition: background-size 0.7s ease; padding-bottom: 1px;
+  }
+  .ul-draw.is-drawn { background-size: 100% 2px; }
+
+  /* ---- Trade Lifecycle (traveling shipment) ---- */
+  .lc-node { transition: opacity 0.3s ease; }
+  .lc-node.is-on .lc-dot { background-color: #f2a93b; border-color: #f2a93b; color: #09090a; }
+  .lc-node.is-on .lc-glow { opacity: 1; }
+  .lc-node.is-on .lc-label { color: #fafafa; }
+  .lc-node.is-on .lc-detail { opacity: 1; transform: translateY(0); }
+  /* hover / tap spotlight */
+  .lc-track.has-hover .lc-node:not(.is-hover),
+  .lc-track-v.has-hover .lc-node:not(.is-hover) { opacity: 0.4; }
+  .lc-node.is-hover .lc-dot { transform: scale(1.12); border-color: #f2a93b; }
+  .lc-node.is-hover .lc-glow { opacity: 1; }
+  .lc-node.is-hover .lc-label { color: #fafafa; }
+  .lc-node.is-hover .lc-detail { opacity: 1; transform: translateY(0); }
+  /* arrival pop + customs stamp flash */
+  @keyframes lcPop { 0% { transform: scale(1); } 40% { transform: scale(1.22); } 100% { transform: scale(1); } }
+  .lc-node.lc-pop .lc-dot { animation: lcPop 0.5s ease; }
+  @keyframes lcStamp { 0% { box-shadow: 0 0 0 0 rgba(242, 169, 59, 0.5); } 100% { box-shadow: 0 0 0 14px rgba(242, 169, 59, 0); } }
+  .lc-node.lc-stamp .lc-dot { animation: lcPop 0.5s ease, lcStamp 0.6s ease-out; }
+  /* shipment idle bob */
+  @keyframes lcBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .lc-ship-inner { animation: lcBob 1.6s ease-in-out infinite; }
+
+  /* ---- How Executes ghost numerals ---- */
+  .exec-row:hover .exec-ghost { color: rgba(242, 169, 59, 0.14); }
+
+  /* ---- FAQ accordion ---- */
+  .faq-a { transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
+  .faq-a > p { opacity: 0; transform: translateY(-6px); transition: opacity 0.3s ease, transform 0.3s ease; }
+  .faq-item.is-open .faq-a > p { opacity: 1; transform: none; transition-delay: 0.1s; }
+  .faq-icon-v { transform: translateX(-50%) scaleY(1); transform-origin: center; transition: transform 0.3s ease; }
+  .faq-item.is-open .faq-icon-v { transform: translateX(-50%) scaleY(0); }
+  .faq-item:not(.is-open):hover .faq-q-text { transform: translateX(6px); }
+  .faq-item:hover .faq-num { color: #fff; }
+  .faq-item:hover .faq-sweep { width: 100%; }
+
+  /* ---- Global Reach radial map ---- */
+  #reach-map .reach-line { transition: opacity 0.25s ease, stroke 0.25s ease, stroke-width 0.25s ease; }
+  #reach-map .reach-node { transition: opacity 0.25s ease; cursor: pointer; }
+  #reach-map .reach-node-mark { transition: transform 0.25s ease; }
+  #reach-map.has-hl .reach-line:not(.hl) { opacity: 0.12; }
+  #reach-map.has-hl .reach-node:not(.hl) { opacity: 0.3; }
+  #reach-map .reach-line.hl { stroke: #f2a93b; stroke-width: 2.6; opacity: 1; }
+  #reach-map .reach-node.hl .reach-node-mark { transform: scale(1.4); }
+  #reach-map .reach-node.hl .reach-node-ring { stroke: #f2a93b; stroke-width: 2; }
+  .reach-row.hl { background-color: rgba(242, 169, 59, 0.07); }
+  #hub-glow { animation: hubPulse 2.6s ease-in-out infinite; }
+  @keyframes hubPulse {
+    0%, 100% { transform: scale(1); opacity: 0.28; }
+    50% { transform: scale(1.5); opacity: 0.06; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ul-draw { background-size: 100% 2px; transition: none; }
+    .faq-a, .faq-a > p { transition: none; }
+    #hub-glow { animation: none; }
+    .lc-ship-inner { animation: none; }
+  }
+</style>
+
+<!-- Live Trade Feed + FAQ accordion (DOM-only, no imports) -->
+<script>
+  type Entry = { route: string; desc: string; category: string };
+  type LiveEntry = Entry & { ts: number };
+
+  /* ===== Live Trade Feed ===== */
+  const list = document.getElementById('feed-list');
+  if (list) {
+    const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const MAX = 8;
+
+    const pill: Record<string, string> = {
+      Equipment: 'bg-bizvault-amber/10 text-bizvault-amber',
+      Infrastructure: 'bg-sky-400/10 text-sky-300',
+      Textiles: 'bg-bizvault-amber-deep/15 text-bizvault-amber-deep',
+      Sourcing: 'bg-teal-400/10 text-teal-300',
+    };
+
+    const pool: Entry[] = [
+      { route: 'Dubai ↔ South Asia', desc: 'Industrial equipment sourcing', category: 'Equipment' },
+      { route: 'Dubai ↔ Far East', desc: 'Mega project procurement support', category: 'Infrastructure' },
+      { route: 'Dubai ↔ UK', desc: 'Fabric & textile trade corridor', category: 'Textiles' },
+      { route: 'Dubai ↔ East Africa', desc: 'Utility infrastructure machinery', category: 'Infrastructure' },
+      { route: 'Dubai ↔ Pakistan', desc: 'Textile sourcing & export coordination', category: 'Textiles' },
+      { route: 'Dubai ↔ Europe', desc: 'Equipment freight & customs clearance', category: 'Equipment' },
+      { route: 'Dubai ↔ MENA', desc: 'Multi-country supplier sourcing', category: 'Sourcing' },
+      { route: 'Dubai ↔ South Asia', desc: 'Bottling plant equipment supply', category: 'Infrastructure' },
+      { route: 'Dubai ↔ Central Asia', desc: 'Heavy machinery procurement stream', category: 'Equipment' },
+      { route: 'Dubai ↔ Southeast Asia', desc: 'Multi-supplier sourcing coordination', category: 'Sourcing' },
+      { route: 'Dubai ↔ China', desc: 'Component sourcing & consolidation', category: 'Sourcing' },
+      { route: 'Dubai ↔ Turkey', desc: 'Textile mill export coordination', category: 'Textiles' },
+      { route: 'Dubai ↔ India', desc: 'Industrial valve & pump procurement', category: 'Equipment' },
+      { route: 'Dubai ↔ GCC', desc: 'Water park equipment supply', category: 'Infrastructure' },
+      { route: 'Dubai ↔ Bangladesh', desc: 'Garment export logistics coordination', category: 'Textiles' },
+      { route: 'Dubai ↔ West Africa', desc: 'Project cargo & freight planning', category: 'Infrastructure' },
+    ];
+
+    let active = 'All';
+    let feed: LiveEntry[] = [];
+    let lastInsert = Date.now();
+
+    const relTime = (ts: number, now: number): string => {
+      const s = Math.max(0, Math.round((now - ts) / 1000));
+      if (s < 5) return 'just now';
+      if (s < 60) return `${s}s ago`;
+      const m = Math.floor(s / 60);
+      if (m < 60) return `${m}m ago`;
+      return `${Math.floor(m / 60)}h ago`;
+    };
+
+    const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+    const rowHTML = (e: LiveEntry, now: number): string =>
+      `<div class="feed-row flex items-center gap-3 p-4" data-category="${e.category}" data-ts="${e.ts}">` +
+      `<span class="feed-time text-bizvault-muted text-xs tabular-nums shrink-0 w-16">${relTime(e.ts, now)}</span>` +
+      `<div class="feed-reveal min-w-0 flex-1"><p class="text-sm font-medium truncate">${esc(e.route)}</p>` +
+      `<p class="text-bizvault-muted text-xs mt-0.5">${esc(e.desc)}</p></div>` +
+      `<span class="feed-pill shrink-0 text-[10px] uppercase tracking-widest px-2 py-1 rounded ${pill[e.category] || ''}">${e.category}</span>` +
+      `</div>`;
+
+    const renderList = (animateTop: boolean) => {
+      const now = Date.now();
+      const visible = feed.filter((e) => active === 'All' || e.category === active).slice(0, MAX);
+      list.innerHTML = visible.map((e) => rowHTML(e, now)).join('');
+      if (animateTop && !REDUCE) {
+        const row = list.firstElementChild as HTMLElement | null;
+        if (row) {
+          row.classList.add('feed-row--enter');
+          void row.offsetHeight; // flush so the animation runs
+          // Status lifecycle: show "ROUTING" then settle into the category pill
+          const pillEl = row.querySelector('.feed-pill') as HTMLElement | null;
+          const cat = row.dataset.category || '';
+          if (pillEl) {
+            pillEl.className = 'feed-pill shrink-0 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest px-2 py-1 rounded bg-bizvault-amber/15 text-bizvault-amber';
+            pillEl.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-bizvault-amber animate-pulse"></span>Routing';
+            window.setTimeout(() => {
+              if (!pillEl.isConnected) return;
+              pillEl.className = `feed-pill shrink-0 text-[10px] uppercase tracking-widest px-2 py-1 rounded ${pill[cat] || ''}`;
+              pillEl.textContent = cat;
+            }, 1500);
+          }
+        }
+      }
+    };
+
+    const updateTimes = () => {
+      const now = Date.now();
+      list.querySelectorAll<HTMLElement>('.feed-row').forEach((row) => {
+        const t = row.querySelector('.feed-time');
+        if (t) t.textContent = relTime(Number(row.dataset.ts), now);
+      });
+      const upd = document.getElementById('feed-updated');
+      if (upd) upd.textContent = relTime(lastInsert, now);
+    };
+
+    const pickEntry = (): Entry => {
+      const choices = active === 'All' ? pool : pool.filter((p) => p.category === active);
+      const src = choices.length ? choices : pool;
+      return src[Math.floor(Math.random() * src.length)];
+    };
+
+    // Seed with ageing timestamps so the initial feed already looks live.
+    const now0 = Date.now();
+    feed = pool.slice(0, MAX).map((e, i) => ({ ...e, ts: now0 - (i + 1) * 42000 }));
+    renderList(false);
+
+    document.querySelectorAll<HTMLButtonElement>('.feed-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        active = tab.dataset.filter || 'All';
+        document.querySelectorAll<HTMLButtonElement>('.feed-tab').forEach((t) => {
+          const on = t === tab;
+          t.classList.toggle('text-white', on);
+          t.classList.toggle('border-bizvault-amber', on);
+          t.classList.toggle('text-bizvault-muted', !on);
+          t.classList.toggle('border-transparent', !on);
+        });
+        renderList(false);
+      });
+    });
+
+    // Live metrics counter
+    const countEl = document.getElementById('feed-count');
+    let movements = 1247;
+    const fmt = (n: number) => n.toLocaleString('en-US');
+
+    if (!REDUCE) {
+      setInterval(updateTimes, 1000);
+
+      setInterval(() => {
+        movements += 1 + Math.floor(Math.random() * 3);
+        if (countEl) countEl.textContent = fmt(movements);
+      }, 6000);
+
+      const loop = () => {
+        window.setTimeout(() => {
+          feed.unshift({ ...pickEntry(), ts: Date.now() });
+          if (feed.length > 40) feed.length = 40;
+          lastInsert = Date.now();
+          renderList(true);
+          const upd = document.getElementById('feed-updated');
+          if (upd) upd.textContent = 'just now';
+          loop();
+        }, 4000 + Math.random() * 2000);
+      };
+      loop();
+    }
+  }
+
+  /* ===== FAQ accordion (one open at a time, smooth height) ===== */
+  const faqItems = Array.from(document.querySelectorAll<HTMLElement>('.faq-item'));
+  if (faqItems.length) {
+    const setOpen = (item: HTMLElement, open: boolean) => {
+      item.classList.toggle('is-open', open);
+      const panel = item.querySelector('.faq-a') as HTMLElement | null;
+      if (panel) panel.style.maxHeight = open ? `${panel.scrollHeight}px` : '0px';
+    };
+    faqItems.forEach((item) => {
+      const btn = item.querySelector('.faq-q');
+      btn?.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('is-open');
+        faqItems.forEach((i) => setOpen(i, false));
+        if (!wasOpen) setOpen(item, true);
+      });
+    });
+    // First item open by default
+    setOpen(faqItems[0], true);
+    window.addEventListener('resize', () => {
+      const openPanel = document.querySelector('.faq-item.is-open .faq-a') as HTMLElement | null;
+      if (openPanel) openPanel.style.maxHeight = `${openPanel.scrollHeight}px`;
+    });
+  }
+</script>
+
+<!-- Scroll animations (GSAP/ScrollTrigger configured globally in Layout) -->
+<script>
+  import { gsap } from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+  gsap.registerPlugin(ScrollTrigger);
+
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ===== Stats strip — bulletproof reveal + count-up ===== */
+  const strip = document.getElementById('stats-strip');
+  if (strip) {
+    const cells = gsap.utils.toArray<HTMLElement>('.stat-cell');
+    const nums = Array.from(strip.querySelectorAll<HTMLElement>('.stat-num'));
+    const targets = new Map<HTMLElement, number>();
+    nums.forEach((n) => targets.set(n, Number((n.textContent || '0').trim())));
+
+    if (reduce) {
+      // Final, fully visible state — numbers already show their value in the HTML.
+      gsap.set(cells, { opacity: 1, y: 0 });
+    } else {
+      gsap.set(cells, { opacity: 0, y: 24 });
+      nums.forEach((n) => { n.textContent = '0'; });
+
+      let revealed = false;
+      const reveal = () => {
+        if (revealed) return;
+        revealed = true;
+        gsap.to(cells, {
+          opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power2.out', overwrite: 'auto',
+          onComplete: () => gsap.set(cells, { clearProps: 'opacity,transform' }),
+        });
+        nums.forEach((n) => {
+          const target = targets.get(n) || 0;
+          const obj = { v: 0 };
+          gsap.to(obj, {
+            v: target, duration: 1.2, ease: 'power2.out',
+            onUpdate: () => { n.textContent = String(Math.round(obj.v)); },
+            onComplete: () => { n.textContent = String(target); },
+          });
+        });
+      };
+
+      // Primary trigger.
+      ScrollTrigger.create({ trigger: strip, start: 'top 85%', once: true, onEnter: reveal });
+      // Bulletproof fallback: IntersectionObserver guarantees the reveal whether the
+      // strip is already in view on load OR scrolled into view later (covers Lenis/refresh
+      // timing edge-cases that can otherwise leave cells stuck hidden).
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { reveal(); io.disconnect(); } });
+      }, { threshold: 0.15 });
+      io.observe(strip);
+    }
+  }
+
+  /* ===== Trade Verticals stagger ===== */
+  const vertSection = document.getElementById('verticals');
+  if (vertSection && !reduce) {
+    const cards = gsap.utils.toArray<HTMLElement>('#verticals .vert-card');
+    gsap.set(cards, { opacity: 0, y: 30 });
+    ScrollTrigger.create({
+      trigger: vertSection, start: 'top 80%', once: true,
+      onEnter: () => gsap.to(cards, { opacity: 1, y: 0, duration: 0.7, stagger: 0.1, ease: 'power2.out' }),
+    });
+  }
+
+  /* ===== End-to-End: accent line scrub + underline draw + lifecycle shipment ===== */
+  const e2e = document.getElementById('end-to-end');
+  if (e2e) {
+    const vline = e2e.querySelector<HTMLElement>('[data-e2e-line]');
+    const uls = Array.from(e2e.querySelectorAll<HTMLElement>('.ul-draw'));
+    const lifecycleEl = document.getElementById('lifecycle');
+    const lcNodes = Array.from(e2e.querySelectorAll<HTMLElement>('[data-lc-node]'));
+    const fillH = e2e.querySelector<HTMLElement>('[data-lc-fill]');
+    const fillV = e2e.querySelector<HTMLElement>('[data-lc-fill-v]');
+    const shipH = e2e.querySelector<HTMLElement>('[data-lc-ship]');
+    const shipV = e2e.querySelector<HTMLElement>('[data-lc-ship-v]');
+    const trackV = e2e.querySelector<HTMLElement>('.lc-track-v');
+
+    // Position the shipment + grow the fill line for a given progress 0→1.
+    const positionShip = (p: number) => {
+      if (fillH) fillH.style.transform = `scaleX(${p})`;
+      if (fillV) fillV.style.transform = `scaleY(${p})`;
+      if (shipH) shipH.style.left = `${10 + p * 80}%`;
+      if (shipV && trackV) shipV.style.top = `${24 + p * (trackV.clientHeight - 48)}px`;
+    };
+    const setNodes = (p: number) => {
+      lcNodes.forEach((n) => n.classList.toggle('is-on', p >= Number(n.dataset.index) / 4 - 0.001));
+    };
+
+    // Hover (desktop) / tap (mobile) spotlight — independent of scroll position.
+    lcNodes.forEach((node) => {
+      const track = node.closest('.lc-track, .lc-track-v');
+      node.addEventListener('mouseenter', () => { node.classList.add('is-hover'); track?.classList.add('has-hover'); });
+      node.addEventListener('mouseleave', () => { node.classList.remove('is-hover'); track?.classList.remove('has-hover'); });
+      node.addEventListener('click', () => {
+        const was = node.classList.contains('is-hover');
+        track?.querySelectorAll('.lc-node').forEach((n) => n.classList.remove('is-hover'));
+        if (!was) { node.classList.add('is-hover'); track?.classList.add('has-hover'); }
+        else { track?.classList.remove('has-hover'); }
+      });
+    });
+
+    if (reduce) {
+      if (vline) vline.style.transform = 'scaleY(1)';
+      uls.forEach((u) => u.classList.add('is-drawn'));
+      positionShip(1);
+      lcNodes.forEach((n) => n.classList.add('is-on'));
+    } else {
+      // Vertical accent line draws with scroll
+      if (vline) {
+        gsap.fromTo(vline, { scaleY: 0 }, {
+          scaleY: 1, ease: 'none',
+          scrollTrigger: { trigger: e2e, start: 'top 70%', end: 'bottom 75%', scrub: true },
+        });
+      }
+      // Underlines draw once when the section enters
+      ScrollTrigger.create({ trigger: e2e, start: 'top 65%', once: true, onEnter: () => uls.forEach((u) => u.classList.add('is-drawn')) });
+
+      // Lifecycle shipment — scrubbed travel + arrival activation (pop / customs stamp)
+      const activated = new Set<number>();
+      let lastP = 0;
+      const apply = (p: number) => {
+        lastP = p;
+        positionShip(p);
+        setNodes(p);
+        for (let i = 0; i < 5; i++) {
+          if (p >= i / 4 - 0.001 && !activated.has(i)) {
+            activated.add(i);
+            e2e.querySelectorAll(`[data-lc-node][data-index="${i}"]`).forEach((n) => {
+              n.classList.add(i === 3 ? 'lc-stamp' : 'lc-pop');
+              window.setTimeout(() => { n.classList.remove('lc-pop'); n.classList.remove('lc-stamp'); }, 650);
+            });
+          } else if (p < i / 4 - 0.03 && activated.has(i)) {
+            activated.delete(i);
+          }
+        }
+      };
+      apply(0);
+      if (lifecycleEl) {
+        ScrollTrigger.create({
+          trigger: lifecycleEl, start: 'top 80%', end: 'bottom 70%', scrub: true,
+          onUpdate: (self) => apply(self.progress),
+        });
+      }
+      window.addEventListener('resize', () => positionShip(lastP));
+    }
+  }
+
+  /* ===== How Executes: per-principle reveal ===== */
+  const execRows = gsap.utils.toArray<HTMLElement>('.exec-row');
+  execRows.forEach((row) => {
+    const ghost = row.querySelector<HTMLElement>('.exec-ghost');
+    const line = row.querySelector<HTMLElement>('.exec-line');
+    const items = gsap.utils.toArray<HTMLElement>(row.querySelectorAll('[data-exec-item]'));
+    if (reduce) {
+      if (line) line.style.transform = 'scaleY(1)';
+      return;
+    }
+    if (ghost) gsap.set(ghost, { opacity: 0, x: -20 });
+    if (line) gsap.set(line, { scaleY: 0 });
+    gsap.set(items, { opacity: 0, y: 24 });
+    ScrollTrigger.create({
+      trigger: row, start: 'top 80%', once: true,
+      onEnter: () => {
+        const tl = gsap.timeline();
+        if (ghost) tl.to(ghost, { opacity: 1, x: 0, duration: 0.7, ease: 'power2.out' }, 0);
+        if (line) tl.to(line, { scaleY: 1, duration: 0.6, ease: 'power2.out' }, 0.1);
+        tl.to(items, { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out' }, 0.15);
+      },
+    });
+  });
+  const execClose = document.querySelector<HTMLElement>('[data-exec-close]');
+  if (execClose && !reduce) {
+    gsap.set(execClose, { opacity: 0, y: 24 });
+    ScrollTrigger.create({
+      trigger: execClose, start: 'top 85%', once: true,
+      onEnter: () => gsap.to(execClose, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }),
+    });
+  }
+
+  /* ===== Global Reach: radial map draw + live pulses + hover highlight ===== */
+  const map = document.getElementById('reach-map');
+  if (map) {
+    const HUB = { x: 200, y: 200 };
+    const lines = Array.from(map.querySelectorAll<SVGLineElement>('.reach-line'));
+    const outerNodes = Array.from(map.querySelectorAll<SVGGElement>('.reach-node'));
+    const marks = Array.from(map.querySelectorAll<SVGGElement>('.reach-node-mark'));
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('.reach-row'));
+    const pulseLayer = map.querySelector('#reach-pulses');
+
+    // Prepare line draw
+    lines.forEach((l) => {
+      const len = l.getTotalLength();
+      l.style.strokeDasharray = `${len}`;
+      l.style.strokeDashoffset = reduce ? '0' : `${len}`;
+    });
+
+    // Build pulse dots — travel hub-centre → node-centre (same x2/y2 as the line)
+    const pulses = lines.map((l) => {
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('r', '3');
+      c.setAttribute('fill', l.dataset.color || '#F2A93B');
+      c.setAttribute('opacity', '0');
+      pulseLayer?.appendChild(c);
+      return { el: c, x2: Number(l.getAttribute('x2')), y2: Number(l.getAttribute('y2')) };
+    });
+
+    let pulsesOn = false;
+    const animatePulses = (t: number) => {
+      pulses.forEach((p, i) => {
+        const phase = ((t / 2600) + i / pulses.length) % 1;
+        p.el.setAttribute('cx', String(HUB.x + (p.x2 - HUB.x) * phase));
+        p.el.setAttribute('cy', String(HUB.y + (p.y2 - HUB.y) * phase));
+        const op = phase < 0.12 ? phase / 0.12 : phase > 0.85 ? (1 - phase) / 0.15 : 1;
+        p.el.setAttribute('opacity', String(0.9 * Math.max(0, op)));
+      });
+      requestAnimationFrame(animatePulses);
+    };
+
+    if (reduce) {
+      gsap.set(marks, { opacity: 1, scale: 1 });
+    } else {
+      gsap.set(marks, { scale: 0, opacity: 0 });
+      let revealed = false;
+      const reveal = () => {
+        if (revealed) return;
+        revealed = true;
+        const tl = gsap.timeline();
+        tl.to(lines, { strokeDashoffset: 0, duration: 0.9, stagger: 0.12, ease: 'power2.out' });
+        tl.to(marks, {
+          scale: 1, opacity: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.7)',
+          onComplete: () => gsap.set(marks, { clearProps: 'transform,opacity' }),
+        }, '-=0.5');
+        tl.add(() => { if (!pulsesOn) { pulsesOn = true; requestAnimationFrame(animatePulses); } });
+      };
+      // Primary + IntersectionObserver fallback so the map never stays hidden.
+      ScrollTrigger.create({ trigger: map, start: 'top 80%', once: true, onEnter: reveal });
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => { if (e.isIntersecting) { reveal(); io.disconnect(); } });
+      }, { threshold: 0.1 });
+      io.observe(map);
+    }
+
+    // Reciprocal hover highlight (row ↔ its line + node) — works for all 6 corridors
+    const highlight = (slug: string | null) => {
+      map.classList.toggle('has-hl', !!slug);
+      lines.forEach((l) => l.classList.toggle('hl', !!slug && l.id === `line-${slug}`));
+      outerNodes.forEach((n) => n.classList.toggle('hl', !!slug && n.dataset.corridor === slug));
+      rows.forEach((r) => r.classList.toggle('hl', !!slug && r.dataset.corridor === slug));
+    };
+    rows.forEach((row) => {
+      row.addEventListener('mouseenter', () => highlight(row.dataset.corridor || null));
+      row.addEventListener('mouseleave', () => highlight(null));
+    });
+    outerNodes.forEach((node) => {
+      node.addEventListener('mouseenter', () => highlight(node.dataset.corridor || null));
+      node.addEventListener('mouseleave', () => highlight(null));
+    });
+  }
+</script>
