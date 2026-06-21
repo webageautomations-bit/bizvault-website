@@ -104,24 +104,42 @@
     function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
     function stop() { running = false; cancelAnimationFrame(raf); }
 
+    // Decide ONCE on load: animate only on a real desktop (≥768px + fine pointer) without
+    // reduced-motion. Mobile width, touch / coarse pointer, and reduced-motion get a single
+    // STATIC frame — no loop, no listeners, no scroll-driven regeneration.
+    const animated = !reduce && window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
+
     size();
-    if (reduce) {
+
+    if (!animated) {
+      // STATIC: draw one frame and stop. No rAF, no pointer/touch reactivity, no sweep motion.
       frame();
-    } else {
-      if (interactive() && !mqMobile.matches) {
-        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
-        window.addEventListener('blur', () => { mouse.active = false; });
-        window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
-      }
-      // Re-size ONLY on a real width change. Mobile scroll fires resize as the address bar
-      // shows/hides (height changes, width doesn't) — ignore those so the grid never reshuffles.
+      // Redraw the single static frame only on a genuine width/orientation change; ignore
+      // height-only resizes (mobile address bar) so it never reshuffles on scroll.
       let rt = 0;
       let lastW = window.innerWidth;
       window.addEventListener('resize', () => {
         clearTimeout(rt);
         rt = window.setTimeout(() => {
           const w = window.innerWidth;
-          if (Math.abs(w - lastW) < 5) return; // address-bar height change only — keep stable
+          if (Math.abs(w - lastW) < 5) return;
+          lastW = w;
+          size();
+          frame();
+        }, 220);
+      });
+    } else {
+      // INTERACTIVE (desktop) — unchanged: light-sweep + hover spotlight + click ripple.
+      window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+      window.addEventListener('blur', () => { mouse.active = false; });
+      window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      let rt = 0;
+      let lastW = window.innerWidth;
+      window.addEventListener('resize', () => {
+        clearTimeout(rt);
+        rt = window.setTimeout(() => {
+          const w = window.innerWidth;
+          if (Math.abs(w - lastW) < 5) return;
           lastW = w;
           size();
         }, 220);

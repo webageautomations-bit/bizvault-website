@@ -117,25 +117,44 @@
     function start() { if (running || reduce) return; running = true; raf = requestAnimationFrame(loop); }
     function stop() { running = false; cancelAnimationFrame(raf); }
 
+    // Decide ONCE on load: animate only on a real desktop (≥768px + fine pointer) without
+    // reduced-motion. Everything else (mobile width, touch / coarse pointer, reduced-motion)
+    // renders a single STATIC frame — no loop, no listeners, no scroll-driven regeneration.
+    const animated = !reduce && window.matchMedia('(min-width: 768px) and (pointer: fine)').matches;
+
     size(); build();
-    if (reduce) {
-      frame(); // single static frame, no loop
-    } else {
-      if (interactive() && !mqMobile.matches) {
-        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
-        window.addEventListener('blur', () => { mouse.active = false; });
-        window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
-      }
-      // Re-init ONLY on a real width change (orientation / desktop resize). Mobile scroll
-      // fires resize as the address bar shows/hides — that changes height, not width — so we
-      // ignore height-only resizes and keep the existing nodes running (no reshuffle).
+
+    if (!animated) {
+      // STATIC: draw one frame and stop. No rAF, no pointer/touch reactivity.
+      frame();
+      // Only on a genuine width/orientation change, redraw the single static frame at the new
+      // size. Height-only resizes (mobile address bar on scroll) are ignored → never reshuffles.
       let rt = 0;
       let lastW = window.innerWidth;
       window.addEventListener('resize', () => {
         clearTimeout(rt);
         rt = window.setTimeout(() => {
           const w = window.innerWidth;
-          if (Math.abs(w - lastW) < 5) return; // address-bar height change only — keep stable
+          if (Math.abs(w - lastW) < 5) return;
+          lastW = w;
+          size();
+          build();
+          frame();
+        }, 220);
+      });
+    } else {
+      // INTERACTIVE (desktop) — unchanged: drift + hover glow/attraction + click ripple.
+      window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true; }, { passive: true });
+      window.addEventListener('blur', () => { mouse.active = false; });
+      window.addEventListener('click', (e) => { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }, { passive: true });
+      // Re-init only on a real width change; ignore height-only resizes.
+      let rt = 0;
+      let lastW = window.innerWidth;
+      window.addEventListener('resize', () => {
+        clearTimeout(rt);
+        rt = window.setTimeout(() => {
+          const w = window.innerWidth;
+          if (Math.abs(w - lastW) < 5) return;
           lastW = w;
           size();
           build();
